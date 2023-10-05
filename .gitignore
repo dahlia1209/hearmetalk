@@ -21,3 +21,24 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Flask specific
+instance/
+.webassets-cache
+
+# Virtual environment
+venv/
+
+# SQLite database file (if used)
+*.sqlite
+
+# Environment variables
+.env
+
+# IDE - Visual Studio Code
+.vscode/
