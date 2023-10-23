@@ -1,9 +1,13 @@
 <template>
   <div>
-    <h2>音声アップロード</h2>
-    <input type="file" ref="audioInput" />
-    <button @click="submitAudio">送信</button>
-    <audio v-if="audioSrc" controls :src="audioSrc"></audio>
+    <h2>AIとの会話</h2>
+    <!-- 音声の録音を開始するボタン -->
+    <button @click="startRecording">Start Recording</button>
+    <!-- 音声の録音を終了して音声をサーバに送信するボタン -->
+    <button @click="stopRecordingAndSend">Stop Recording</button>
+
+    <!-- 音声のテキスト変換結果を表示する部分 -->
+    <div v-if="transcription">{{ transcription }}</div>
   </div>
 </template>
 
@@ -11,32 +15,68 @@
 export default {
   data() {
     return {
-      audioSrc: null
+      mediaRecorder: null,
+      audioChunks: [],
+      transcription: "",
     };
   },
   methods: {
-    async submitAudio() {
-      const audioFile = this.$refs.audioInput.files[0];
-      const formData = new FormData();
-      formData.append('audio', audioFile);
+    async startRecording() {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      this.mediaRecorder = new MediaRecorder(stream);
+      this.mediaRecorder.ondataavailable = (event) => {
+        this.audioChunks.push(event.data);
+      };
+      this.mediaRecorder.start();
+    },
+    async stopRecordingAndSend() {
+      return new Promise((resolve) => {
+        this.mediaRecorder.onstop = async () => {
+          const audioBlob = new Blob(this.audioChunks, { type: "audio/webm" });
+          const formData = new FormData();
+          formData.append("audio", audioBlob);
+          try {
+            const response = await fetch("http://localhost:5000/orchestrate", {
+              method: "POST",
+              body: formData,
+            });
+            if (response.ok) {
+              const audioBlob = await response.blob();
+              this.audioSrc = URL.createObjectURL(audioBlob);
+            } else {
+              console.error("Error during the request:", response.statusText);
+            }
+            resolve();
+          } catch (err) {
+            console.error("Error:", err);
+          }
+        };
+        this.mediaRecorder.stop();
+        this.mediaRecorder.stream.getTracks().forEach((track) => track.stop());
+      });
+    },
+    // async submitAudio() {
+    //   const audioFile = this.$refs.audioInput.files[0];
+    //   const formData = new FormData();
+    //   formData.append("audio", audioFile);
 
-      try {
-        const response = await fetch("http://localhost:5000/orchestrate", {
-          method: 'POST',
-          body: formData,
-        });
+    //   try {
+    //     const response = await fetch("http://localhost:5000/orchestrate", {
+    //       method: "POST",
+    //       body: formData,
+    //     });
 
-        if (response.ok) {
-          const audioBlob = await response.blob();
-          this.audioSrc = URL.createObjectURL(audioBlob);
-        } else {
-          console.error('Error during the request:', response.statusText);
-        }
-      } catch (error) {
-        console.error('There was an error sending the request:', error);
-      }
-    }
-  }
+    //     if (response.ok) {
+    //       const audioBlob = await response.blob();
+    //       this.audioSrc = URL.createObjectURL(audioBlob);
+    //     } else {
+    //       console.error("Error during the request:", response.statusText);
+    //     }
+    //   } catch (error) {
+    //     console.error("There was an error sending the request:", error);
+    //   }
+    // },
+  },
 };
 </script>
 

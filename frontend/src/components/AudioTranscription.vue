@@ -26,13 +26,14 @@ export default {
       formData.append("audio", this.selectedFile);
 
       axios
-        .post("http://localhost:5000/transcribe", formData, {
+        .post("http://localhost:5000/recognize", formData, { 
           headers: {
             "Content-Type": "multipart/form-data",
           },
         })
         .then((response) => {
-          this.transcription = response.data.transcription;
+          console.log(response.data)
+          this.transcription = response.data.text;
         })
         .catch((error) => {
           console.error("An error occurred:", error);
