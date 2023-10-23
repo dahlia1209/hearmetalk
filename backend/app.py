@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 import logging
 import uuid
 import requests 
+import subprocess
 
 # ログの設定
 logging.basicConfig(level=logging.DEBUG)  # この行を変更することでログレベルを変えられます
@@ -18,7 +19,6 @@ logger = logging.getLogger(__name__)
 
 # .envファイルから環境変数を読み込む
 load_dotenv()  
-
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
 
@@ -28,45 +28,25 @@ def get_message():
 
 @app.route('/transcribe', methods=['POST'])
 def transcribe_audio():
-    audio_file = tempfile.NamedTemporaryFile(delete=False)
-    audio_data = request.files['audio'].read()
-    audio_file.write(audio_data)
-    audio_file.close()
+    audio_file = request.files.get('audio')
+    if not audio_file:
+        return jsonify({"error": "No audio file provided"}), 400
 
     speech_key, service_region = os.getenv('SPEECH_KEY'), "eastus"
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
-    speech_config.speech_recognition_language = 'ja-JP'
-    audio_config = speechsdk.audio.AudioConfig(filename=audio_file.name)
+    audio_config = speechsdk.audio.AudioConfig(stream=audio_file)
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
 
-    # 認識結果を保存するためのリスト
-    results = []
+    result = speech_recognizer.recognize_once()
 
-    # イベントハンドラで認識結果をリストに追加する
-    def recognized(args):
-        results.append(args.result.text)
+    if result.reason == speechsdk.ResultReason.RecognizedSpeech:
+        return jsonify({"transcription": result.text})
+    elif result.reason == speechsdk.ResultReason.NoMatch:
+        return jsonify({"error": "No speech could be recognized"}), 400
+    elif result.reason == speechsdk.ResultReason.Canceled:
+        cancellation = result.cancellation_details
+        return jsonify({"error": "Speech Recognition canceled", "details": cancellation.error_details}), 500
 
-    speech_recognizer.recognized.connect(recognized)
-
-    # 連続的な音声認識を開始
-    speech_recognizer.start_continuous_recognition()
-    time.sleep(10) 
-    speech_recognizer.stop_continuous_recognition()
-    del speech_recognizer 
-    time.sleep(2)  
-
-    # ファイル削除の試み
-    try:
-        os.unlink(audio_file.name)  # 一時ファイルの削除
-    except PermissionError:
-        time.sleep(5)  # さらに待機して再試行
-        os.unlink(audio_file.name) 
-
-    print("Temp file saved at:", audio_file.name)
-
-    # 結果を結合して返す
-    transcription = " ".join(results)
-    return jsonify({"transcription": transcription})
 
 @app.route('/synthesize', methods=['POST'])
 def synthesize():
@@ -153,12 +133,12 @@ def chat():
 def orchestrate():
     # 1. 音声をテキストに変換
     audio_data = request.files['audio']
-    response_transcribe = requests.post('http://localhost:5000/transcribe', files={'audio': audio_data})
+    response_transcribe = requests.post('http://localhost:5000/recognize', files={'audio': audio_data})
 
     if response_transcribe.status_code != 200:
         return jsonify({"error": "Failed to transcribe audio"}), 500
 
-    transcription = response_transcribe.json().get('transcription')
+    transcription = response_transcribe.json().get('text')
 
     # 2. OpenAIからのレスポンスを取得
     response_chat = requests.post('http://localhost:5000/chat', json={"text": transcription})
@@ -173,6 +153,50 @@ def orchestrate():
         return jsonify({"error": "Failed to synthesize voice"}), 500
 
     return Response(response_synthesize.content, mimetype="audio/wav")
+
+@app.route('/recognize', methods=['POST'])
+def recognize_speech():
+    # 音声データを受け取り
+    audio_file = tempfile.NamedTemporaryFile(delete=False, suffix=".webm")
+    audio_data = request.files['audio'].read()
+    audio_file.write(audio_data)
+    audio_file.close()
+
+    # Convert WebM to WAV using ffmpeg
+    wav_file_name = audio_file.name.replace('.webm', '.wav')
+    command = ['ffmpeg', '-i', audio_file.name, '-acodec', 'pcm_s16le', '-ac', '1', '-ar', '16000', wav_file_name]
+    subprocess.run(command, check=True)
+
+    # ログ出力
+    app.logger.info(f"Audio data size: {len(audio_data)} bytes")
+    app.logger.info(f"Saved audio file to: {audio_file.name}")
+    app.logger.info(f"Converted to WAV: {wav_file_name}")
+
+    # Azure Speech SDKを使ってテキスト変換
+    speech_key, service_region = os.getenv('SPEECH_KEY'), "eastus"
+    app.logger.info(f"Speech key: {speech_key}")
+    app.logger.info(f"Service region: {service_region}")
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    speech_config.speech_recognition_language = 'ja-JP'
+    audio_config = speechsdk.AudioConfig(filename=wav_file_name)
+    speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
+
+    result = speech_recognizer.recognize_once_async().get()
+
+    # 認識結果のログ出力
+    app.logger.info(f"Recognition result: {result.text}")
+
+    return jsonify({"text": result.text})
+
+# 安全にファイルを削除する関数
+def safe_remove(file_path, retry=5, delay=1):
+    for _ in range(retry):
+        try:
+            os.remove(file_path)
+            return
+        except PermissionError:
+            time.sleep(delay)
+    raise PermissionError(f"Failed to remove file: {file_path} after {retry} retries.")
 
 if __name__ == '__main__':
     app.run(debug=True)
