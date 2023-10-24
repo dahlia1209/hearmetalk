@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import NewPage from '@/components/NewPage.vue'
-import HelloWorld from '@/components/HelloWorld.vue'
+import Home from '@/components/Home.vue'
 import AudioTranscription from '@/components/AudioTranscription.vue'
 import VoiceOutput from '@/components/VoiceOutput.vue';
 import ChatInput from '@/components/ChatInput.vue'; 
@@ -11,12 +10,7 @@ const routes = [
   {
     path: '/',
     name: 'Home',
-    component: HelloWorld 
-  },
-  {
-    path: '/new-page',
-    name: 'NewPage',
-    component: NewPage
+    component: Home 
   },
   {
     path: '/transcribe',

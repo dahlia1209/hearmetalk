@@ -22,6 +22,7 @@ export default {
   },
   methods: {
     async startRecording() {
+      this.audioChunks = [];
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       this.mediaRecorder = new MediaRecorder(stream);
       this.mediaRecorder.ondataavailable = (event) => {
@@ -39,6 +40,7 @@ export default {
             const response = await fetch("http://localhost:5000/orchestrate", {
               method: "POST",
               body: formData,
+              credentials: "include",
             });
             if (response.ok) {
               const audioBlob = await response.blob();
@@ -55,27 +57,6 @@ export default {
         this.mediaRecorder.stream.getTracks().forEach((track) => track.stop());
       });
     },
-    // async submitAudio() {
-    //   const audioFile = this.$refs.audioInput.files[0];
-    //   const formData = new FormData();
-    //   formData.append("audio", audioFile);
-
-    //   try {
-    //     const response = await fetch("http://localhost:5000/orchestrate", {
-    //       method: "POST",
-    //       body: formData,
-    //     });
-
-    //     if (response.ok) {
-    //       const audioBlob = await response.blob();
-    //       this.audioSrc = URL.createObjectURL(audioBlob);
-    //     } else {
-    //       console.error("Error during the request:", response.statusText);
-    //     }
-    //   } catch (error) {
-    //     console.error("There was an error sending the request:", error);
-    //   }
-    // },
   },
 };
 </script>
