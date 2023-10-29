@@ -85,7 +85,7 @@ export default {
 }
 
 .audio-section {
-  width: 30%;
+  width: 80%;
 }
 
 .detail-section {
