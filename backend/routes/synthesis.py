@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, Response
+from flask import Blueprint, request, jsonify, Response, current_app
 from services import azure_services
 
 synthesis = Blueprint('synthesis', __name__)
@@ -24,4 +24,6 @@ def synthesize_speech_from_text(text):
         raise ValueError("Text not provided")
     
     synthesized_audio = azure_services.synthesize(text)
+    
+
     return synthesized_audio

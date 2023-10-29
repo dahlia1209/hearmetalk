@@ -99,9 +99,11 @@ export default {
       });
     },
     async sendAudioToServer(audioData) {
+      console.log("sendAudioToServer called");
       const formData = new FormData();
       formData.append("audio", audioData);
       try {
+        console.log("Requested ");
         const response = await fetch(
           `${process.env.VUE_APP_API_URL}/orchestrate`,
           {
@@ -110,6 +112,7 @@ export default {
             credentials: "include",
           }
         );
+        console.log("Responsed ");
         if (response.ok) {
           const audioBlob = await response.blob();
           console.log('URL.createObjectURL(audioBlob)'+URL.createObjectURL(audioBlob))

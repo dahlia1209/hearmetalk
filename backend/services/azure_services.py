@@ -27,7 +27,7 @@ def transcribe(audio_file):
 def synthesize(text):
     """Azureを使用してテキストを音声データに変換する関数。"""
     speech_config = initialize_azure_speech_client()
-    speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config)
+    speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config,audio_config=None)
 
     result = speech_synthesizer.speak_text(text)
     if result.reason == speechsdk.ResultReason.SynthesizingAudioCompleted:
