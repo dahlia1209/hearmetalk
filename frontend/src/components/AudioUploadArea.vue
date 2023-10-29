@@ -33,6 +33,9 @@
             マイクで音声を録音する
           </button></span
         >
+        <div>
+          <audio v-if="audioSrc" controls :src="audioSrc"></audio>
+        </div>
       </div>
       <div v-else>
         <button @click="stopRecordingAndSend" class="recording-button">
@@ -62,6 +65,7 @@ export default {
       StopIcon,
       listening,
       isRecording: false,
+      audioSrc: null,
     };
   },
   methods: {
@@ -98,14 +102,18 @@ export default {
       const formData = new FormData();
       formData.append("audio", audioData);
       try {
-        const response = await fetch(`${process.env.VUE_APP_API_URL}/orchestrate`, {
-          method: "POST",
-          body: formData,
-          credentials: "include",
-        });
+        const response = await fetch(
+          `${process.env.VUE_APP_API_URL}/orchestrate`,
+          {
+            method: "POST",
+            body: formData,
+            credentials: "include",
+          }
+        );
         if (response.ok) {
-          const result = await response.json();
-          this.transcription = result.transcription;
+          const audioBlob = await response.blob();
+          console.log('URL.createObjectURL(audioBlob)'+URL.createObjectURL(audioBlob))
+          this.audioSrc = URL.createObjectURL(audioBlob);
         } else {
           console.error("Error during the request:", response.statusText);
         }
