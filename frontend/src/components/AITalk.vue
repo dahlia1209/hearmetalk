@@ -2,6 +2,10 @@
   <div class="container">
     <div class="audio-section">
       <AudioUploadArea />
+      <AudioFileList />
+    </div>
+    <div class="detail-section">
+      <AudioDetail />
     </div>
   </div>
 </template>
@@ -10,6 +14,8 @@
 import MicIcon from "@/assets/MicIcon.svg";
 import StopIcon from "@/assets/StopIcon.svg";
 import AudioUploadArea from "./AudioUploadArea.vue";
+import AudioFileList from "./AudioFileList.vue";
+import AudioDetail from "./AudioDetail.vue";
 
 export default {
   data() {
@@ -24,7 +30,8 @@ export default {
   },
   components: {
     AudioUploadArea,
-
+    AudioFileList,
+    AudioDetail,
   },
   methods: {
     showInfo(file) {

@@ -27,8 +27,6 @@ def chat_logic(text_input):
     session_id = session.get('session_id') or str(uuid.uuid4())
     session['session_id'] = session_id
 
-    current_app.logger.debug(f"session_id 1: {session_id}")
-
     if session_id not in user_chat_histories:
         user_chat_histories[session_id] = [
             {"role": "system", "content": "You are a helpful assistant."}

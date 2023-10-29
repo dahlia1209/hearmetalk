@@ -5,6 +5,7 @@ import VoiceOutput from '@/components/VoiceOutput.vue';
 import ChatInput from '@/components/ChatInput.vue'; 
 import Orchestration from '@/components/Orchestration.vue'; 
 import VoiceTranscription from '@/components/VoiceTranscription.vue'; 
+import AITalk from '@/components/AITalk.vue'; 
 
 const routes = [
   {
@@ -31,6 +32,11 @@ const routes = [
     path: '/orchestrate',
     name: 'Orchestration',
     component: Orchestration  
+  },
+  {
+    path: '/ai-talk',
+    name: 'AITalk',
+    component: AITalk  
   },
   {
     path: '/voice-transcription',
