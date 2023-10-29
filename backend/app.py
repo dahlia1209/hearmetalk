@@ -15,6 +15,8 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
 app.config['SECRET_KEY'] = os.getenv('APP_CONFIG_SECRET_KEY') 
+app.config['SESSION_COOKIE_SAMESITE'] = 'None'
+app.config['SESSION_COOKIE_SECURE'] = True
 
 # 各ルートのBlueprintを登録
 app.register_blueprint(transcription.transcription)

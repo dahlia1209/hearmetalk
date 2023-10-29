@@ -114,6 +114,8 @@ export default {
           const audioBlob = await response.blob();
           console.log('URL.createObjectURL(audioBlob)'+URL.createObjectURL(audioBlob))
           this.audioSrc = URL.createObjectURL(audioBlob);
+          const audio = new Audio(this.audioSrc);
+          audio.play();
         } else {
           console.error("Error during the request:", response.statusText);
         }

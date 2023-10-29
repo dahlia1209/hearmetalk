@@ -17,7 +17,6 @@ def orchestrate_route():
 
     # 2. OpenAIからのレスポンスを取得
     response_chat = chat.chat_logic(response_transcribe)
-    current_app.logger.debug(f"session_id 2: {session_id}")
 
     # 3. テキストを音声データに変換
     response_synthesize = synthesis.synthesize_speech_from_text(response_chat)
