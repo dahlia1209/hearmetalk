@@ -36,6 +36,9 @@
         <div>
           <audio v-if="audioSrc" controls :src="audioSrc"></audio>
         </div>
+        <div>
+          <div v-for="type in supportedTypes" :key="type">{{ type }}</div>
+        </div>
       </div>
       <div v-else>
         <button @click="stopRecordingAndSend" class="recording-button">
@@ -66,7 +69,28 @@ export default {
       listening,
       isRecording: false,
       audioSrc: null,
+      supportedTypes: [],
     };
+  },
+  created() {
+    const typesToCheck = [
+      "audio/webm",
+      "audio/webm; codecs=opus",
+      "audio/ogg",
+      "audio/ogg; codecs=opus",
+      "audio/ogg; codecs=vorbis",
+      "audio/wav",
+      "audio/x-wav",
+      "audio/mp4; codecs=mp4a.40.2 (AAC-LC)",
+      "audio/mp4; codecs=mp4a.40.5 (HE-AAC)",
+      "audio/aac",
+      "audio/aacp",
+      "audio/mpeg",
+      "audio/mp3",
+    ];
+    this.supportedTypes = typesToCheck.filter((type) =>
+      MediaRecorder.isTypeSupported(type)
+    );
   },
   methods: {
     openFileDialog() {
@@ -89,7 +113,9 @@ export default {
       return new Promise((resolve) => {
         this.isRecording = false;
         this.mediaRecorder.onstop = async () => {
-          const audioBlob = new Blob(this.audioChunks, { type: "audio/webm" });
+          const audioBlob = new Blob(this.audioChunks, {
+            type: this.supportedTypes[0],
+          });
           this.audioSrc = URL.createObjectURL(audioBlob);
           await this.sendAudioToServer(audioBlob);
           resolve();
@@ -115,7 +141,9 @@ export default {
         console.log("Responsed ");
         if (response.ok) {
           const audioBlob = await response.blob();
-          console.log('URL.createObjectURL(audioBlob)'+URL.createObjectURL(audioBlob))
+          console.log(
+            "URL.createObjectURL(audioBlob)" + URL.createObjectURL(audioBlob)
+          );
           this.audioSrc = URL.createObjectURL(audioBlob);
           const audio = new Audio(this.audioSrc);
           audio.play();
