@@ -5,7 +5,7 @@ def chat_with_openai(messages):
     openai.api_key = os.getenv('OPENAI_API_KEY')
 
     completion = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
+        model=os.getenv('OPENAI_CHATCOMPLETION_MODEL'),
         messages=messages
     )
 
