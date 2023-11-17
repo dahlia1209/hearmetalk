@@ -26,3 +26,5 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 
 ### GitHub
 https://github.com/dahlia1209/hearmetalk.git
+
+### tamaranbai
