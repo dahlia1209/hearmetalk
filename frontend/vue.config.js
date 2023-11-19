@@ -8,11 +8,15 @@ module.exports = defineConfig({
           test: /\.ts$/,
           loader: 'ts-loader',
           options: {
-            appendTsSuffixTo: [/\.vue$/]
+            appendTsSuffixTo: [/\.vue$/],
+            // transpileOnly:true
           },
           exclude: /node_modules/
         }
       ]
+    },
+    resolve:{
+      extensions: ['.ts'],
     }
   }
 })
