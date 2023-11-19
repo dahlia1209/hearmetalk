@@ -1,0 +1,45 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "strict": true,
+    "jsx": "preserve",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "sourceMap": true,
+    "baseUrl": ".",
+    "types": [
+      "webpack-env"
+    ],
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    },
+    "lib": [
+      "esnext",
+      "dom",
+      "dom.iterable",
+      "scripthost"
+    ]
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.vue",
+    "tests/**/*.ts",
+  ],
+  "exclude": [
+    "node_modules"
+  ],
+  // "files": [
+  //   "src/components/Chat/ChatPgMessage.vue",
+  //   "src/components/Chat/ChatPanel.vue",
+  //   "src/components/Chat/SystemMessageBox.vue",
+  //   "src/components/ChatInput.vue",
+  //   "src/components/Header.vue",
+  //   "src/components/Home.vue",
+  //   "src/App.vue",
+  //   "src/models/Chat.ts",
+  // ]
+}

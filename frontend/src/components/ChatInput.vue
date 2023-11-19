@@ -1,7 +1,7 @@
 <template>
   <div>
-    <SystemMessageBox />
-    <chat-panel @update:messages="handleMessagesUpdate" ref="ChatPanel" />
+    <!-- <SystemMessageBox /> -->
+    <chat-panel @update:messages="handleMessagesUpdate($event)" ref="ChatPanel" />
     <div class="chat-pg-footer">
       <form @submit.prevent="submitForm">
         <button class="btn-submit">
@@ -13,41 +13,41 @@
   </div>
 </template>
 
-<script>
-import SystemMessageBox from "./Chat/SystemMessageBox.vue";
-import ChatPanel from "./Chat/ChatPanel.vue";
+<script lang="ts">
+// import SystemMessageBox from "./Chat/SystemMessageBox.vue";
+import ChatPanel from "@/components/ChatPanel.vue";
+import { DefineComponent, defineComponent } from 'vue';
+import { Message } from "@/models/Chat"
+import { DeclareFunction } from "@babel/types";
 
-export default {
+export default defineComponent({
   components: {
-    SystemMessageBox,
-    "chat-panel": ChatPanel,
+    // SystemMessageBox,
+    ChatPanel,
   },
   data() {
     return {
       userInput: "",
       responseText: "",
-      messages: [],
+      messages: [] as Message[],
     };
   },
   methods: {
-    handleMessagesUpdate(updatedMessages) {
-      // 更新された messages 配列を受け取る
-      // console.log(updatedMessages)
+    handleMessagesUpdate(updatedMessages:Message[]) {
       this.messages = updatedMessages;
     },
-     async submitForm() {
+    async submitForm() {
       const lastMessage = this.messages[this.messages.length - 1] || {};
       const lastContent = lastMessage.content || '';
-      console.log(lastContent)
-      
+      // console.log(lastContent)
       try {
         const response = await fetch(`${process.env.VUE_APP_API_URL}/chat`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json', 
+            'Content-Type': 'application/json',
           },
-          body: JSON.stringify({text: lastContent}), 
-          credentials: 'include', 
+          body: JSON.stringify({ text: lastContent }),
+          credentials: 'include',
         });
 
         if (!response.ok) {
@@ -56,15 +56,15 @@ export default {
 
         const responseData = await response.json();
         console.log('Submit Successful:', responseData);
-        this.$refs.ChatPanel.addMessage();
+        (this.$refs.ChatPanel as DefineComponent).addMessage();
         // 成功の処理をここに書く
       } catch (error) {
         console.error('Submit Error:', error);
         // エラー処理をここに書く
       }
-     }
+    }
   },
-};
+});
 </script>
 
 <style scoped>
@@ -79,9 +79,11 @@ export default {
   display: inline-block;
   color: #fff;
 }
+
 .btn-submit:hover {
   background-color: #1a7f64;
 }
+
 .btn-submit .tooltiptext {
   visibility: hidden;
   width: auto;
@@ -97,7 +99,7 @@ export default {
   transform: translateX(-50%);
   margin-bottom: 5px;
 }
+
 .btn-submit:hover .tooltiptext {
   visibility: visible;
-}
-</style>
+}</style>

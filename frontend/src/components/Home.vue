@@ -4,16 +4,17 @@
   </div>
 </template>
 
-<script>
-// import axios from 'axios';
+<script lang="ts">
+import { defineComponent } from 'vue';
+import axios from 'axios';
 
-// export default {
-//   data() {
-//     return {
-//       message: 'Loading...'
-//     };
-//   },
-//   created() {
-//   }
-// };
+export default defineComponent( {
+  data() {
+    return {
+      message: 'Hello world...'
+    };
+  },
+  created() {
+  }
+});
 </script>
