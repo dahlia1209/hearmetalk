@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Home from '@/components/Home.vue'
+import Home from '@/views/Home.vue'
 // import AudioTranscription from '@/components/AudioTranscription.vue'
 // import VoiceOutput from '@/components/VoiceOutput.vue';
-import ChatInput from '@/components/ChatInput.vue'; 
+import Chat from '@/views/Chat.vue'; 
 // import Orchestration from '@/components/Orchestration.vue'; 
 // import VoiceTranscription from '@/components/VoiceTranscription.vue'; 
 // import AITalk from '@/components/AITalk.vue'; 
@@ -26,7 +26,7 @@ const routes = [
   {
     path: '/chat',
     name: 'Chat',
-    component: ChatInput  
+    component: Chat  
   },
   // {
   //   path: '/orchestrate',

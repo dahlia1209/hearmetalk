@@ -2,9 +2,8 @@
   <div class="chat-panel">
     <div ref="chatPgExchange" class="chat-pg-exchange">
       <chat-pg-message v-for="message in messages" :key="message.messageId" :message="message"
-        @update:message="handleUpdateMessage($event)"
-        @delete:message="handleDeleteMessage($event)"></chat-pg-message>
-      <button class="chat-pg-message add-message" @click="addMessage">
+        @update-message="updateMessages($event)" @delete-message="deleteMessage($event)"></chat-pg-message>
+      <button class="chat-pg-message add-message" @click="addMessage()">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" class="icon" width="20" height="20">
           <path
             d="M10 16.6667C13.6819 16.6667 16.6667 13.6819 16.6667 9.99999C16.6667 6.3181 13.6819 3.33333 10 3.33333C6.31814 3.33333 3.33337 6.3181 3.33337 9.99999C3.33337 13.6819 6.31814 16.6667 10 16.6667Z"
@@ -23,7 +22,7 @@
 </template>
 
 <script lang="ts">
-import ChatPgMessage from "@/components/ChatPgMessage.vue";
+import ChatPgMessage from "@/components/Chat/ChatPgMessage.vue";
 import { Message } from "@/models/Chat"
 import { v4 as uuidv4 } from "uuid";
 import { defineComponent } from 'vue';
@@ -38,27 +37,26 @@ export default defineComponent({
     };
   },
   methods: {
-    addMessage() {
-      const newmessage = new Message(uuidv4())
-      newmessage.isUser =
+    addMessage(message:Message=new Message()) {
+      message.messageId=uuidv4()
+      message.role =
         this.messages.length == 0 ||
-        !this.messages[this.messages.length - 1].isUser;
-      newmessage.role = newmessage.isUser ? "user" : "assistant";
-      this.messages.push(newmessage);
+          this.messages[this.messages.length - 1].role === "assistant" ? "user" : "assistant";
+      this.messages.push(message);
 
       this.$nextTick(() => {
-        const container = this.$refs.chatPgExchange as HTMLElement;;
+        const container = this.$refs.chatPgExchange as HTMLElement;
         container.scrollTop = container.scrollHeight;
       });
     },
-    handleUpdateMessage(updatedMessage: Message) {
+    updateMessages(updatedMessage: Message) {
       let message = this.messages.find((m) => m.messageId === updatedMessage.messageId);
       if (message) {
         message = updatedMessage;
       }
-      this.$emit("update:messages", this.messages);
+      this.$emit("updateMessages", this.messages);
     },
-    handleDeleteMessage(deletedMessage: Message) {
+    deleteMessage(deletedMessage: Message) {
       this.messages = this.messages.filter((m) => m.messageId !== deletedMessage.messageId);
     },
   },

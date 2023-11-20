@@ -1,15 +1,15 @@
 <template>
   <div class="chat-pg-message" v-if="ischatpgessageVisible">
     <div class="chat-message-role" @click="toggleUserRole">
-      {{ localMessage.isUser ? "USER" : "ASSISTANT" }}
+      {{ localMessage.role==="user" ? "USER" : "ASSISTANT" }}
     </div>
     <textarea class="text-input text-input-md" :placeholder="`Enter a ${localMessage.role} message here.`"
       v-model="localMessage.content" @input="
-        updateValue(localMessage)
+        $emit('updateMessage', localMessage)
       "></textarea>
     <div style="width: 10px">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" class="chat-message-remove-button"
-        width="20" height="20" @click="removeParent(localMessage)" role="button">
+        width="20" height="20" @click="deleteMessage" role="button">
         <path
           d="M10 16.6667C13.6819 16.6667 16.6667 13.6819 16.6667 10C16.6667 6.31811 13.6819 3.33334 10 3.33334C6.31814 3.33334 3.33337 6.31811 3.33337 10C3.33337 13.6819 6.31814 16.6667 10 16.6667Z"
           stroke="#6E6E80" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -35,25 +35,13 @@ export default defineComponent({
       localMessage: this.message
     };
   },
-  mounted() {
-    //  this.localMessage = new Message(this.message.messageId, this.message.isUser, this.message.content, this.message.role);
-    this.updateValue(this.message);
-  },
   methods: {
-    removeParent(message: Message) {
+    deleteMessage() {
       this.ischatpgessageVisible = false;
-      this.$emit("delete:message", { messageId: message.messageId });
+      this.$emit("deleteMessage", { messageId: this.localMessage.messageId });
     },
     toggleUserRole() {
-      this.localMessage.isUser = !this.localMessage.isUser;
-      this.localMessage.role = this.localMessage.isUser ? "user" : "assistant";
-    },
-    updateValue(message: Message) {
-      this.localMessage.messageId = message.messageId;
-      this.localMessage.isUser = message.isUser;
-      this.localMessage.content = message.content;
-      this.localMessage.role = message.role;
-      this.$emit("update:message", { message });
+      this.localMessage.role = this.localMessage.role==="user"?"assistant":"user";
     },
   },
 });

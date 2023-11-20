@@ -1,7 +1,7 @@
 <template>
   <div>
-    <!-- <SystemMessageBox /> -->
-    <chat-panel @update:messages="handleMessagesUpdate($event)" ref="ChatPanel" />
+    <SystemMessageBox @update-system-message="handleSystemMessagesUpdate($event)"/>
+    <chat-panel @update-messages="handleMessagesUpdate($event)" ref="ChatPanel" />
     <div class="chat-pg-footer">
       <form @submit.prevent="submitForm">
         <button class="btn-submit">
@@ -14,49 +14,53 @@
 </template>
 
 <script lang="ts">
-// import SystemMessageBox from "./Chat/SystemMessageBox.vue";
-import ChatPanel from "@/components/ChatPanel.vue";
+import SystemMessageBox from "@/components/Chat/SystemMessageBox.vue";
+import ChatPanel from "@/components/Chat/ChatPanel.vue";
 import { DefineComponent, defineComponent } from 'vue';
-import { Message } from "@/models/Chat"
-import { DeclareFunction } from "@babel/types";
+import { Message,ChatCompletionSettings,MessageDto } from "@/models/Chat"
 
 export default defineComponent({
   components: {
-    // SystemMessageBox,
+    SystemMessageBox,
     ChatPanel,
   },
   data() {
     return {
-      userInput: "",
-      responseText: "",
       messages: [] as Message[],
+      systemmessage: new Message() as Message,
     };
   },
   methods: {
+    handleSystemMessagesUpdate(updatedSystemmessage:Message) {
+      this.systemmessage = updatedSystemmessage;
+      // console.log(this.systemmessage)
+    },
     handleMessagesUpdate(updatedMessages:Message[]) {
       this.messages = updatedMessages;
     },
     async submitForm() {
-      const lastMessage = this.messages[this.messages.length - 1] || {};
-      const lastContent = lastMessage.content || '';
-      // console.log(lastContent)
+
+      const messageDtos=this.systemmessage.content==""?
+        [...this.messages.map(message => message.toDto())]:
+        [this.systemmessage.toDto(),...this.messages.map(message => message.toDto())]
+      const chatCompletionSettings=new ChatCompletionSettings("gpt-4",messageDtos);
       try {
-        const response = await fetch(`${process.env.VUE_APP_API_URL}/chat`, {
+        const response = await fetch(`${process.env.VUE_APP_API_URL}/stateless_chat`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ text: lastContent }),
+          body: JSON.stringify(chatCompletionSettings),
           credentials: 'include',
-        });
+        }); 
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const responseData = await response.json();
-        console.log('Submit Successful:', responseData);
-        (this.$refs.ChatPanel as DefineComponent).addMessage();
+        const responseMessage = new Message("",responseData.content,responseData.assistant);
+        (this.$refs.ChatPanel as DefineComponent).addMessage(responseMessage);
         // 成功の処理をここに書く
       } catch (error) {
         console.error('Submit Error:', error);
