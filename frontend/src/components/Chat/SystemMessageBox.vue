@@ -4,28 +4,25 @@
         <div class="text-input-header-wrapper">
             <textarea aria-label="Input" class="text-input-header-buffer" placeholder="You are a helpful assistant."
                 v-model="localSystemMessage.content" @input="$emit('updateSystemMessage', localSystemMessage)">
-                                </textarea>
+                                    </textarea>
         </div>
     </div>
 </template>
   
-<script lang="ts">
+<script setup lang="ts">
 import { v4 as uuidv4 } from "uuid";
-import { defineComponent } from 'vue';
+import { defineComponent, ref } from 'vue';
 import { Message } from "@/models/Chat"
 
-export default defineComponent({
-    props: {
-        systemmessage: { type: Message, default: () => new Message(uuidv4(),"","system") },
-    },
-    data() {
-        return {
-            localSystemMessage: this.systemmessage
-        };
-    },
-    methods: {
-    }
-});
+interface Props {
+    systemmessage?: Message
+};
+const props = withDefaults(defineProps<Props>(), {
+    systemmessage: () => new Message(uuidv4())
+})
+const localSystemMessage = ref(props.systemmessage);
+
+
 </script>
   
 <style scoped>

@@ -2,7 +2,8 @@
   <div class="chat-panel">
     <div ref="chatPgExchange" class="chat-pg-exchange">
       <chat-pg-message v-for="message in messages" :key="message.messageId" :message="message"
-        @update-message="updateMessages($event)" @delete-message="deleteMessage($event)"></chat-pg-message>
+        @update-message="updateMessages($event); $emit('updateMessages', messages);"
+        @delete-message="deleteMessage($event)"></chat-pg-message>
       <button class="chat-pg-message add-message" @click="addMessage()">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" class="icon" width="20" height="20">
           <path
@@ -21,45 +22,39 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import ChatPgMessage from "@/components/Chat/ChatPgMessage.vue";
 import { Message } from "@/models/Chat"
 import { v4 as uuidv4 } from "uuid";
-import { defineComponent } from 'vue';
+import { ref,  watch } from 'vue';
 
-export default defineComponent({
-  components: {
-    ChatPgMessage,
-  },
-  data() {
-    return {
-      messages: [new Message(uuidv4())] as Message[],
-    };
-  },
-  methods: {
-    addMessage(message:Message=new Message()) {
-      message.messageId=uuidv4()
-      message.role =
-        this.messages.length == 0 ||
-          this.messages[this.messages.length - 1].role === "assistant" ? "user" : "assistant";
-      this.messages.push(message);
+const messages = ref([new Message(uuidv4())])
+const chatPgExchange = ref<HTMLInputElement | null>(null)
 
-      this.$nextTick(() => {
-        const container = this.$refs.chatPgExchange as HTMLElement;
-        container.scrollTop = container.scrollHeight;
-      });
-    },
-    updateMessages(updatedMessage: Message) {
-      let message = this.messages.find((m) => m.messageId === updatedMessage.messageId);
-      if (message) {
-        message = updatedMessage;
-      }
-      this.$emit("updateMessages", this.messages);
-    },
-    deleteMessage(deletedMessage: Message) {
-      this.messages = this.messages.filter((m) => m.messageId !== deletedMessage.messageId);
-    },
-  },
+watch(messages.value, () => {
+  if (chatPgExchange.value) {
+    chatPgExchange.value.scrollTop = chatPgExchange.value?.scrollHeight;
+  }
+}, { flush: 'post' })
+
+function addMessage(message: Message = new Message()) {
+  message.messageId = uuidv4()
+  message.role =
+    messages.value.length == 0 ||
+      messages.value[messages.value.length - 1].role === "assistant" ? "user" : "assistant";
+  messages.value.push(message);
+}
+function updateMessages(updatedMessage: Message) {
+  let message = messages.value.find((m) => m.messageId === updatedMessage.messageId);
+  if (message) {
+    message = updatedMessage;
+  }
+}
+function deleteMessage(deletedMessage: Message) {
+  messages.value = messages.value.filter((m) => m.messageId !== deletedMessage.messageId);
+}
+defineExpose({
+  addMessage
 });
 </script>
 

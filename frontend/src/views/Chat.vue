@@ -1,7 +1,7 @@
 <template>
   <div>
-    <SystemMessageBox @update-system-message="handleSystemMessagesUpdate($event)"/>
-    <chat-panel @update-messages="handleMessagesUpdate($event)" ref="ChatPanel" />
+    <SystemMessageBox @update-system-message="systemMessageUpdate($event)" />
+    <chat-panel @update-messages="messagesUpdate($event)" ref="chatPanel" />
     <div class="chat-pg-footer">
       <form @submit.prevent="submitForm">
         <button class="btn-submit">
@@ -13,62 +13,47 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import SystemMessageBox from "@/components/Chat/SystemMessageBox.vue";
 import ChatPanel from "@/components/Chat/ChatPanel.vue";
-import { DefineComponent, defineComponent } from 'vue';
-import { Message,ChatCompletionSettings,MessageDto } from "@/models/Chat"
+import { DefineComponent, ref } from 'vue';
+import { Message, ChatCompletionSettings, MessageDto } from "@/models/Chat"
+import { submitChat } from "@/services/chatServices"
 
-export default defineComponent({
-  components: {
-    SystemMessageBox,
-    ChatPanel,
-  },
-  data() {
-    return {
-      messages: [] as Message[],
-      systemmessage: new Message() as Message,
-    };
-  },
-  methods: {
-    handleSystemMessagesUpdate(updatedSystemmessage:Message) {
-      this.systemmessage = updatedSystemmessage;
-      // console.log(this.systemmessage)
-    },
-    handleMessagesUpdate(updatedMessages:Message[]) {
-      this.messages = updatedMessages;
-    },
-    async submitForm() {
+interface Props {
+  messages?: Message[]
+  systemmessage?: Message
+};
+const props = withDefaults(defineProps<Props>(), {
+  messages: () => [],
+  systemmessage: () => new Message()
+})
+const messages = ref(props.messages)
+const systemmessage = ref(props.systemmessage)
+const chatPanel = ref<DefineComponent | null>(null)
 
-      const messageDtos=this.systemmessage.content==""?
-        [...this.messages.map(message => message.toDto())]:
-        [this.systemmessage.toDto(),...this.messages.map(message => message.toDto())]
-      const chatCompletionSettings=new ChatCompletionSettings("gpt-4",messageDtos);
-      try {
-        const response = await fetch(`${process.env.VUE_APP_API_URL}/stateless_chat`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(chatCompletionSettings),
-          credentials: 'include',
-        }); 
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const responseData = await response.json();
-        const responseMessage = new Message("",responseData.content,responseData.assistant);
-        (this.$refs.ChatPanel as DefineComponent).addMessage(responseMessage);
-        // 成功の処理をここに書く
-      } catch (error) {
-        console.error('Submit Error:', error);
-        // エラー処理をここに書く
-      }
+function systemMessageUpdate(updatedSystemmessage: Message) {
+  systemmessage.value = updatedSystemmessage;
+}
+function messagesUpdate(updatedMessages: Message[]) {
+  messages.value = updatedMessages;
+}
+async function submitForm() {
+  try {
+    const messageDtos = systemmessage.value.content == "" ?
+      [...messages.value.map(message => message.toDto())] :
+      [systemmessage.value.toDto(), ...messages.value.map(message => message.toDto())]
+    const chatCompletionSettings = new ChatCompletionSettings("gpt-4", messageDtos);
+    
+    const response = await submitChat(chatCompletionSettings);
+    if (chatPanel.value != null) {
+      chatPanel.value.addMessage(response);
     }
-  },
-});
+  } catch (error) {
+    console.error('Submit Error:', error);
+  }
+}
+
 </script>
 
 <style scoped>
@@ -106,4 +91,5 @@ export default defineComponent({
 
 .btn-submit:hover .tooltiptext {
   visibility: visible;
-}</style>
+}
+</style>

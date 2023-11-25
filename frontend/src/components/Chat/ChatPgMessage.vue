@@ -1,15 +1,16 @@
 <template>
   <div class="chat-pg-message" v-if="ischatpgessageVisible">
     <div class="chat-message-role" @click="toggleUserRole">
-      {{ localMessage.role==="user" ? "USER" : "ASSISTANT" }}
+      {{ localMessage.role === "user" ? "USER" : "ASSISTANT" }}
     </div>
-    <textarea class="text-input text-input-md" :placeholder="`Enter a ${localMessage.role} message here.`"
-      v-model="localMessage.content" @input="
-        $emit('updateMessage', localMessage)
-      "></textarea>
+    <textarea class="chat-message-textarea" :placeholder="`Enter a ${localMessage.role} message here.`"
+      v-model="localMessage.content" rows="1" @input="
+        $emit('updateMessage', localMessage); resize($event);
+                                                                                      " ref="textarea"></textarea>
     <div style="width: 10px">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" class="chat-message-remove-button"
-        width="20" height="20" @click="deleteMessage" role="button">
+        width="20" height="20" @click="deleteMessage" role="button"
+        @input="$emit('deleteMessage', { messageId: localMessage.messageId })">
         <path
           d="M10 16.6667C13.6819 16.6667 16.6667 13.6819 16.6667 10C16.6667 6.31811 13.6819 3.33334 10 3.33334C6.31814 3.33334 3.33337 6.31811 3.33337 10C3.33337 13.6819 6.31814 16.6667 10 16.6667Z"
           stroke="#6E6E80" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -20,31 +21,34 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { v4 as uuidv4 } from "uuid";
-import { defineComponent } from 'vue';
+import { ref, defineProps, withDefaults, } from 'vue';
 import { Message } from "@/models/Chat"
 
-export default defineComponent({
-  props: {
-    message: { type: Message, default: () => new Message(uuidv4()) },
-  },
-  data() {
-    return {
-      ischatpgessageVisible: true,
-      localMessage: this.message
-    };
-  },
-  methods: {
-    deleteMessage() {
-      this.ischatpgessageVisible = false;
-      this.$emit("deleteMessage", { messageId: this.localMessage.messageId });
-    },
-    toggleUserRole() {
-      this.localMessage.role = this.localMessage.role==="user"?"assistant":"user";
-    },
-  },
-});
+interface Props {
+  message?: Message
+};
+const props = withDefaults(defineProps<Props>(), {
+  message: () => new Message(uuidv4())
+})
+const localMessage = ref(props.message);
+const ischatpgessageVisible = ref(true)
+function resize(event: Event) {
+  const textarea = event.target as HTMLTextAreaElement;
+  // const previousBoxSizing = textarea.style.boxSizing;
+  // textarea.style.boxSizing = 'content-box';
+  textarea.style.height = 'auto';
+  // const paddingHeight = textarea.offsetHeight - textarea.clientHeight;
+  textarea.style.height =(textarea.scrollHeight) + 'px';
+  // textarea.style.boxSizing = previousBoxSizing; 
+};
+function deleteMessage() {
+  ischatpgessageVisible.value = !ischatpgessageVisible.value;
+}
+function toggleUserRole() {
+  localMessage.value.role = localMessage.value.role === "user" ? "assistant" : "user";
+}
 </script>
 
 <style scoped>
@@ -54,25 +58,29 @@ export default defineComponent({
   padding: 12px 18px;
   gap: 12px;
   cursor: pointer;
+
 }
 
 .chat-pg-message:hover {
   background-color: #eeeeee;
 }
 
-.text-input.text-input-md {
+.chat-message-textarea {
   outline: none;
-  resize: none;
-  border: none;
+  border: 0 #fff;
   background-color: transparent;
   padding: 12px;
   width: 100%;
   cursor: pointer;
+  resize: none;
+  box-sizing: border-box; 
+  line-height: 24px;
+  font-size: 16px;
 }
 
-.text-input.text-input-md:focus {
-  border: 1px solid #19c37d;
-  border-radius: 10px;
+.chat-message-textarea:focus {
+  box-shadow: inset 0 0 0 1px #19c37d;
+  border-radius: 8px;
   background-color: white;
   cursor: auto;
 }
