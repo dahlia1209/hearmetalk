@@ -3,7 +3,7 @@ import Home from '@/views/Home.vue'
 // import AudioTranscription from '@/components/AudioTranscription.vue'
 // import VoiceOutput from '@/components/VoiceOutput.vue';
 import Chat from '@/views/Chat.vue'; 
-import VoiceChat from '@/views/VoiceChat.vue'; 
+import Speech_to_Text from '@/views/SpeechToText.vue'; 
 // import Orchestration from '@/components/Orchestration.vue'; 
 // import VoiceTranscription from '@/components/VoiceTranscription.vue'; 
 // import AITalk from '@/components/AITalk.vue'; 
@@ -15,9 +15,9 @@ const routes = [
     component: Home 
   },
   {
-    path: '/voice-chat',
-    name: 'VoiceChat',
-    component: VoiceChat 
+    path: '/speech-to-text',
+    name: 'SpeechToText',
+    component: Speech_to_Text 
   },
   // {
   //   path: '/transcribe',

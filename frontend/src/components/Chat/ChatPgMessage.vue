@@ -23,7 +23,7 @@
 
 <script setup lang="ts">
 import { v4 as uuidv4 } from "uuid";
-import { ref, defineProps, withDefaults, } from 'vue';
+import { ref,  withDefaults, } from 'vue';
 import { Message } from "@/models/Chat"
 
 interface Props {
