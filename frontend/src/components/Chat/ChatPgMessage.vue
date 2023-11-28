@@ -5,8 +5,8 @@
     </div>
     <textarea class="chat-message-textarea" :placeholder="`Enter a ${localMessage.role} message here.`"
       v-model="localMessage.content" rows="1" @input="
-        $emit('updateMessage', localMessage); resize($event);
-                                                                                      " ref="textarea"></textarea>
+        $emit('updateMessage', localMessage); textareaRef===null?null:resize(textareaRef);
+                                                                                              " ref="textareaRef"></textarea>
     <div style="width: 10px">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" class="chat-message-remove-button"
         width="20" height="20" @click="deleteMessage" role="button"
@@ -23,9 +23,14 @@
 
 <script setup lang="ts">
 import { v4 as uuidv4 } from "uuid";
-import { ref,  withDefaults, } from 'vue';
+import { onMounted, ref, withDefaults, } from 'vue';
 import { Message } from "@/models/Chat"
 
+onMounted(() => {
+  if (textareaRef.value) {
+    resize(textareaRef.value)
+  }
+})
 interface Props {
   message?: Message
 };
@@ -34,14 +39,11 @@ const props = withDefaults(defineProps<Props>(), {
 })
 const localMessage = ref(props.message);
 const ischatpgessageVisible = ref(true)
-function resize(event: Event) {
-  const textarea = event.target as HTMLTextAreaElement;
-  // const previousBoxSizing = textarea.style.boxSizing;
-  // textarea.style.boxSizing = 'content-box';
+const textareaRef = ref<HTMLTextAreaElement | null>(null)
+
+function resize(textarea: HTMLTextAreaElement) {
   textarea.style.height = 'auto';
-  // const paddingHeight = textarea.offsetHeight - textarea.clientHeight;
-  textarea.style.height =(textarea.scrollHeight) + 'px';
-  // textarea.style.boxSizing = previousBoxSizing; 
+  textarea.style.height = (textarea.scrollHeight) + 'px';
 };
 function deleteMessage() {
   ischatpgessageVisible.value = !ischatpgessageVisible.value;
@@ -73,7 +75,7 @@ function toggleUserRole() {
   width: 100%;
   cursor: pointer;
   resize: none;
-  box-sizing: border-box; 
+  box-sizing: border-box;
   line-height: 24px;
   font-size: 16px;
 }
