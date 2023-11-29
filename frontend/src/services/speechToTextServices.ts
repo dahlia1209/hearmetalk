@@ -9,7 +9,7 @@ export const submitAudio = async (audioData: AudioData): Promise<AudioDataDto> =
         const formData = new FormData();
         // ファイルをFormDataオブジェクトに追加
         formData.append('file', audioData.audioFile);
-        const response = await axios.post(`${process.env.VUE_APP_API_URL}/voice_chat`, formData, {
+        const response = await axios.post(`${import.meta.env.VITE_API_URL}/voice_chat`, formData, {
             withCredentials: true,
         });
         // レスポンスデータの処理

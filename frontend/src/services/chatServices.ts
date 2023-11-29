@@ -3,7 +3,7 @@ import { Message, ChatCompletionSettings } from "@/models/Chat"
 
 export const submitChat = async (chatCompletionSettings: ChatCompletionSettings): Promise<Message>=> {
     try {
-        const response = await axios.post(`${process.env.VUE_APP_API_URL}/stateless_chat`, chatCompletionSettings, {
+        const response = await axios.post(`${import.meta.env.VITE_API_URL}/stateless_chat`, chatCompletionSettings, {
             withCredentials: true,
             headers: {
                 'Content-Type': 'application/json'

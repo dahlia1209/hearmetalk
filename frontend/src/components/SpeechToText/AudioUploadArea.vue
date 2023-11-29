@@ -26,8 +26,7 @@ import StopIcon from "@/assets/StopIcon.svg";
 import spinner from "@/assets/spinner.svg";
 import listening from "@/assets/listening.svg";
 import { AudioType,AudioData } from "@/models/SpeechToText"
-import { DefineComponent, onMounted, ref } from 'vue';
-import { newExpression } from "@babel/types";
+import {  onMounted, ref } from 'vue';
 import { submitAudio } from "@/services/speechToTextServices";
 
 const props = defineProps<{ audioDataList: AudioData[] }>()
@@ -67,7 +66,7 @@ async function setAudioDataFromInput(): Promise<boolean> {
             if (maxTries >= tries) {
                 inputFile = new File([inputFile], newFileName)
             } else {
-                throw newExpression;
+                throw Error;
             }
         }
         console.log(inputFile.name)

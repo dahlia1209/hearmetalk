@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import { DefineComponent, defineComponent,ref } from 'vue';
+import { defineComponent,ref } from 'vue';
 import AudioUploadArea from "@/components/SpeechToText/AudioUploadArea.vue";
 import AudioFileList from "@/components/SpeechToText/AudioFileList.vue";
 import AudioFileDetail from "@/components/SpeechToText/AudioFileDetail.vue";

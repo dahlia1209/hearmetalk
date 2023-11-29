@@ -16,11 +16,11 @@
 <script setup lang="ts">
 import SystemMessageBox from "@/components/Chat/SystemMessageBox.vue";
 import ChatPanel from "@/components/Chat/ChatPanel.vue";
-import { DefineComponent, ref } from 'vue';
+import { type DefineComponent, ref } from 'vue';
 import { Message, ChatCompletionSettings, MessageDto } from "@/models/Chat"
 import { submitChat } from "@/services/chatServices"
 
-interface Props {
+export interface Props {
   messages?: Message[]
   systemmessage?: Message
 };

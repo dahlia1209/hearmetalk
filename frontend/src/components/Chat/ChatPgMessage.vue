@@ -26,18 +26,19 @@ import { v4 as uuidv4 } from "uuid";
 import { onMounted, ref, withDefaults, } from 'vue';
 import { Message } from "@/models/Chat"
 
-onMounted(() => {
-  if (textareaRef.value) {
-    resize(textareaRef.value)
-  }
-})
-interface Props {
+export interface Props {
   message?: Message
 };
 const props = withDefaults(defineProps<Props>(), {
   message: () => new Message(uuidv4())
 })
+
 const localMessage = ref(props.message);
+onMounted(() => {
+  if (textareaRef.value) {
+    resize(textareaRef.value)
+  }
+})
 const ischatpgessageVisible = ref(true)
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
 
