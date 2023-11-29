@@ -14,7 +14,7 @@ import { v4 as uuidv4 } from "uuid";
 import { defineComponent, ref } from 'vue';
 import { Message } from "@/models/Chat"
 
-export interface Props {
+interface Props {
     systemmessage?: Message
 };
 const props = withDefaults(defineProps<Props>(), {

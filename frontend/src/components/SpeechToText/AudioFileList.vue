@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import {  ref, watch } from 'vue';
+import { DefineComponent, defineComponent, ref, watch } from 'vue';
 import GreenCheck from "@/assets/GreenCheck.svg";
 import TrashBin from "@/assets/TrashBin.svg";
 import rotate from "@/assets/rotate.svg";

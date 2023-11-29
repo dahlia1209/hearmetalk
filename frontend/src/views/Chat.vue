@@ -16,11 +16,11 @@
 <script setup lang="ts">
 import SystemMessageBox from "@/components/Chat/SystemMessageBox.vue";
 import ChatPanel from "@/components/Chat/ChatPanel.vue";
-import { type DefineComponent, ref } from 'vue';
+import { DefineComponent, ref } from 'vue';
 import { Message, ChatCompletionSettings, MessageDto } from "@/models/Chat"
 import { submitChat } from "@/services/chatServices"
 
-export  interface Props {
+interface Props {
   messages?: Message[]
   systemmessage?: Message
 };
@@ -28,7 +28,6 @@ const props = withDefaults(defineProps<Props>(), {
   messages: () => [],
   systemmessage: () => new Message()
 })
-
 const messages = ref(props.messages)
 const systemmessage = ref(props.systemmessage)
 const chatPanel = ref<DefineComponent | null>(null)
@@ -41,7 +40,6 @@ function messagesUpdate(updatedMessages: Message[]) {
 }
 async function submitForm() {
   try {
-    console.log("submitForm")
     const messageDtos = systemmessage.value.content == "" ?
       [...messages.value.map(message => message.toDto())] :
       [systemmessage.value.toDto(), ...messages.value.map(message => message.toDto())]
