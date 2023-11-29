@@ -15,7 +15,7 @@ module.exports = defineConfig({
       ]
     },
     resolve:{
-      extensions: ['.ts', '.js', '.vue'],
+      extensions: ['.ts'],
     }
   }
 })

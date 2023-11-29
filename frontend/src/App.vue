@@ -7,6 +7,7 @@
 </template>
 
 <script lang="ts">
+import { RouterLink, RouterView } from 'vue-router'
 import { defineComponent } from 'vue';
 import Home from './views/Home.vue'
 import Header from './views/Header.vue'

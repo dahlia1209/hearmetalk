@@ -26,7 +26,7 @@ import StopIcon from "@/assets/StopIcon.svg";
 import spinner from "@/assets/spinner.svg";
 import listening from "@/assets/listening.svg";
 import { AudioType,AudioData } from "@/models/SpeechToText"
-import { DefineComponent, onMounted, ref } from 'vue';
+import {  onMounted, ref } from 'vue';
 import { newExpression } from "@babel/types";
 import { submitAudio } from "@/services/speechToTextServices";
 
