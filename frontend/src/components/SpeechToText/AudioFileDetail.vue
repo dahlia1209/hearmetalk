@@ -6,9 +6,8 @@
         </div>
         <div class="div-2">
             <div>
-                <img src="@/assets/replayButton.svg" alt="replayButton" class="svg-1" @click="playAudio()"
-                    v-if="!isPlaying">
-                <img src="@/assets/stopReplay.svg" alt="stopReplay" class="svg-1" @click="stopAudio()" v-else>
+                <img :src="replayButton" alt="replayButton" class="svg-1" @click="playAudio()" v-if="!isPlaying">
+                <img :src="stopReplay" alt="stopReplay" class="svg-1" @click="stopAudio()" v-else>
             </div>
             <audio ref="audioPlayer" @timeupdate="updateSlider" @ended="handleEnded()"></audio>
 
@@ -22,7 +21,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
+import {ref, watch,onMounted  } from 'vue';
+import replayButton from "@/assets/replayButton.svg";
+import stopReplay from "@/assets/stopReplay.svg";
 import { AudioData } from "@/models/SpeechToText"
 
 const props = defineProps<{ audioData: AudioData | null }>()
