@@ -1,5 +1,3 @@
-declare module '*.svg';
-
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {

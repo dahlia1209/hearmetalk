@@ -58,8 +58,6 @@ async function handleSubmitAudio(audioData: AudioData, index: number) {
     try {
         recordingState.value='pending'
         const response = await submitAudio(audioData);
-        console.log(response.filename)
-        console.log(index)
         audioDataList.value[index] = new AudioData(audioDataList.value[index].audioDataId, response.toFile(), response.durationMs, response.filename, response.mimeType, response.fileExtension, response.text)
         emit('audioDataSelected', audioDataList.value[index])
         recordingState.value='stop'

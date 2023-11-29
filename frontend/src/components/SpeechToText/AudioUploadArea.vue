@@ -101,7 +101,6 @@ async function startRecording(): Promise<void> {
 };
 
 async function stopRecording(): Promise<AudioData | null> {
-    recordingState.value = "pending";
     await new Promise((resolve, reject) => {
         if (!mediaRecorder.value) {
             reject(new Error("MediaRecorder is not initialized"));
@@ -126,18 +125,20 @@ async function stopRecording(): Promise<AudioData | null> {
     audioData.text = response.text
     uploadedAudioData.value = audioData;
 
-    recordingState.value = "stop";
     return uploadedAudioData.value;
 };
 
 async function handleStopRecording() {
     try {
+        recordingState.value = "pending";
         const result = await stopRecording();
         if (result !== null) {
             emit('audioDataUploaded', uploadedAudioData.value);
         }
+        recordingState.value = "stop";
     } catch (error) {
         console.error("録音の停止中にエラーが発生しました", error);
+        recordingState.value = "stop";
     }
 }
 
