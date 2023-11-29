@@ -1,15 +1,15 @@
 <template>
     <div class="audio-upload-area">
-        <img :src="cloudupload" class="img-1" />
+        <img src="@/assets/cloudupload.svg" class="img-1" />
         <div class="div-1">オーディオ ファイルをここにドラッグ アンド ドロップするか、</div>
         <div><button type="button" class="button-1" @click="input1 !== null ? input1.click() : null">ファイルの参照...</button>
         </div>
         <input type="file" accept="audio/*" class="input-1" ref="input1"
             @change="setAudioDataFromInput() " />
         <div class="div-2">
-            <img :src="MicIcon" class="img-2" @click="handleStartRecording()" v-if="recordingState === 'stop'" />
-            <img :src="StopIcon" class="img-2" @click="handleStopRecording()" v-else-if="recordingState === 'recording'" />
-            <img :src="spinner" class="img-2" v-else-if="recordingState === 'pending'" />
+            <img src="@/assets/MicIcon.svg" class="img-2" @click="handleStartRecording()" v-if="recordingState === 'stop'" />
+            <img src="@/assets/StopIcon.svg" class="img-2" @click="handleStopRecording()" v-else-if="recordingState === 'recording'" />
+            <img src="@/assets/spinner.svg" class="img-2" v-else-if="recordingState === 'pending'" />
         </div>
         <div>
             <div class="div-3" v-if="recordingState === 'stop'">またはマイクで音声を録音する</div>
@@ -20,11 +20,6 @@
 </template>
 
 <script setup lang="ts">
-import cloudupload from "@/assets/cloudupload.svg";
-import MicIcon from "@/assets/MicIcon.svg";
-import StopIcon from "@/assets/StopIcon.svg";
-import spinner from "@/assets/spinner.svg";
-import listening from "@/assets/listening.svg";
 import { AudioType,AudioData } from "@/models/SpeechToText"
 import {  onMounted, ref } from 'vue';
 import { submitAudio } from "@/services/speechToTextServices";

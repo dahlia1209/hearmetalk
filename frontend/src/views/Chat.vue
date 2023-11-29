@@ -5,8 +5,10 @@
     <div class="chat-pg-footer">
       <form @submit.prevent="submitForm">
         <button class="btn-submit">
-          Submit
-          <span class="tooltiptext">Ctrl + Enter</span>
+          <div v-if="isSubmitting">Submit
+            <span class="tooltiptext">Ctrl + Enter</span>
+          </div>
+          <div v-else></div>
         </button>
       </form>
     </div>
@@ -19,6 +21,8 @@ import ChatPanel from "@/components/Chat/ChatPanel.vue";
 import { type DefineComponent, ref } from 'vue';
 import { Message, ChatCompletionSettings, MessageDto } from "@/models/Chat"
 import { submitChat } from "@/services/chatServices"
+
+const isSubmitting = ref(false)
 
 export interface Props {
   messages?: Message[]
@@ -44,7 +48,7 @@ async function submitForm() {
       [...messages.value.map(message => message.toDto())] :
       [systemmessage.value.toDto(), ...messages.value.map(message => message.toDto())]
     const chatCompletionSettings = new ChatCompletionSettings("gpt-4", messageDtos);
-    
+
     const response = await submitChat(chatCompletionSettings);
     if (chatPanel.value != null) {
       chatPanel.value.addMessage(response);

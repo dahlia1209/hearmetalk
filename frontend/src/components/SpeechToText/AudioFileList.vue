@@ -3,25 +3,21 @@
         <div class="div-2" v-if="audioDataList.length === 0">オーディオ ファイルがここに表示されます</div>
         <div tabindex="0" class="div-1" v-for="(audioData, index) in audioDataList" :key="audioData.audioDataId"
             :class="{ 'selected': selectedAudioDataIndex === index }" @click="audioDataSelected(audioData, index)">
-            <img :src="GreenCheck" alt="GreenCheck">
+            <img src="@/assets/GreenCheck.svg" alt="GreenCheck">
             <button type="button" class="button-1" ref="filesRefs">{{
                 audioData.audioFile.name
             }}</button>
             <div>
-                <img :src="rotate" alt="rotate" class="svg-1" @click.stop="handleSubmitAudio(audioData, index)" v-if="recordingState==='stop'">
-                <img :src="spinner" alt="spinner" class="svg-1"  v-else-if="recordingState==='pending'">
+                <img src="@/assets/rotate.svg" alt="rotate" class="svg-1" @click.stop="handleSubmitAudio(audioData, index)" v-if="recordingState==='stop'">
+                <img src="@/assets/spinner.svg" alt="spinner" class="svg-1"  v-else-if="recordingState==='pending'">
             </div>
-            <img :src="TrashBin" alt="TrashBin" class="svg-1" @click.stop="removeAudioData(index)">
+            <img src="@/assets/TrashBin.svg" alt="TrashBin" class="svg-1" @click.stop="removeAudioData(index)">
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { DefineComponent, defineComponent, ref, watch } from 'vue';
-import GreenCheck from "@/assets/GreenCheck.svg";
-import TrashBin from "@/assets/TrashBin.svg";
-import rotate from "@/assets/rotate.svg";
-import spinner from "@/assets/spinner.svg";
+import { ref, watch } from 'vue';
 import { submitAudio } from "@/services/speechToTextServices"
 import { AudioData } from "@/models/SpeechToText"
 
