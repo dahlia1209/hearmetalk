@@ -8,16 +8,20 @@
   </header>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import { defineComponent } from 'vue';
+import { useRouter } from 'vue-router';
+
+export default defineComponent( {
   name: 'Header',
   computed: {
     routes() {
+      const router = useRouter();
       // メタタグなどで表示を制御したい場合、この部分を修正します
-      return this.$router.options.routes.filter(route => !route.meta || !route.meta.hidden);
+      return router.options.routes.filter(route => !route.meta || !route.meta.hidden);
     }
   }
-}
+})
 </script>
 
 <style scoped>

@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify, session, current_app
 from services import openai_services
 import uuid
 import os
+from models.chat import ChatCompletionSettings,Message,MessageDto
 
 chat = Blueprint('chat', __name__)
 

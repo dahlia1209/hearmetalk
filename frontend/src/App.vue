@@ -1,22 +1,23 @@
 <template>
   <div>
-    <Header /> 
+    <Header />
     <!-- <img alt="Vue logo" src="./assets/logo.png"> -->
     <router-view />
   </div>
 </template>
 
-<script>
-import Home from './components/Home.vue'
-import Header from './components/Header.vue'
+<script lang="ts">
+import { defineComponent } from 'vue';
+import Home from './views/Home.vue'
+import Header from './views/Header.vue'
 
-export default {
+export default defineComponent({
   name: 'App',
   components: {
     Home,
-    Header 
+    Header
   }
-}
+})
 </script>
 
 <style>

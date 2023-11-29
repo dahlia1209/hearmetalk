@@ -2,7 +2,7 @@ from flask import Flask
 from flask_cors import CORS
 from dotenv import load_dotenv
 import logging
-from routes import transcription, synthesis, chat, orchestration
+from routes import transcription, synthesis, chat, orchestration,stateless_chat,voice_chat
 import os
 
 # ログの設定
@@ -22,7 +22,9 @@ app.config['SESSION_COOKIE_SECURE'] = True
 app.register_blueprint(transcription.transcription)
 app.register_blueprint(synthesis.synthesis)
 app.register_blueprint(chat.chat)
+app.register_blueprint(stateless_chat.stateless_chat)
 app.register_blueprint(orchestration.orchestration)
+app.register_blueprint(voice_chat.voice_chat)
 
 if __name__ == '__main__':
     app.run(debug=True)

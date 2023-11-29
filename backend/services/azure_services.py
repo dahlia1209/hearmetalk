@@ -1,5 +1,7 @@
-import os
+import os,tempfile
 import azure.cognitiveservices.speech as speechsdk
+from models.voice_chat import AudioData
+from models.voice_chat import AudioDataDto,AudioData
 
 def initialize_azure_speech_client():
     """Azureの音声クライアントを初期化します。"""
@@ -9,10 +11,14 @@ def initialize_azure_speech_client():
     speech_config.speech_synthesis_voice_name = os.getenv('AZURE_SPEECH_SYNTHESIS_VOICE_NAME')
     return speech_config
 
-def transcribe(audio_file):
+def transcribe(audio_data:AudioData)->str:
     """Azureを使用して音声データをテキストに変換する関数。"""
+    # 音声データを一時ファイルに保存
+    temp_audio_file=tempfile.NamedTemporaryFile(delete=False, suffix=audio_data.audio_data_dto.file_extension )
+    audio_data.audio_segment.export(temp_audio_file.name, format="wav")
+
     speech_config = initialize_azure_speech_client()
-    audio_input = speechsdk.AudioConfig(filename=audio_file)
+    audio_input = speechsdk.AudioConfig(filename=temp_audio_file.name)
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_input)
     
     result = speech_recognizer.recognize_once()
