@@ -5,10 +5,10 @@
     <div class="chat-pg-footer">
       <form @submit.prevent="submitForm">
         <button class="btn-submit">
-          <div v-if="isSubmitting">Submit
+          <div v-if="!isSubmitting">Submit
             <span class="tooltiptext">Ctrl + Enter</span>
           </div>
-          <div v-else></div>
+          <div v-else><img src="@/assets/spinner.svg" alt="spinner" class="svg-1" /></div>
         </button>
       </form>
     </div>
@@ -44,6 +44,7 @@ function messagesUpdate(updatedMessages: Message[]) {
 }
 async function submitForm() {
   try {
+    isSubmitting.value=true
     const messageDtos = systemmessage.value.content == "" ?
       [...messages.value.map(message => message.toDto())] :
       [systemmessage.value.toDto(), ...messages.value.map(message => message.toDto())]
@@ -53,8 +54,10 @@ async function submitForm() {
     if (chatPanel.value != null) {
       chatPanel.value.addMessage(response);
     }
+    isSubmitting.value=false
   } catch (error) {
     console.error('Submit Error:', error);
+    isSubmitting.value=false
   }
 }
 
