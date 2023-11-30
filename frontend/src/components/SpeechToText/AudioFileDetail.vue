@@ -100,8 +100,8 @@ function formatTime(seconds: number) {
     flex-direction: column;
     border-color: #605E5C;
     padding: 12px;
-    max-height: 500px;
-    height: 500px;
+    max-height: 300px;
+    height: 300px;
 }
 
 .div-1 {

@@ -20,7 +20,7 @@
 </template>
 
 <script setup lang="ts">
-import { AudioType,AudioData } from "@/models/SpeechToText"
+import { AudioData,MimeTypeMapper } from "@/models/SpeechToText"
 import {  onMounted, ref } from 'vue';
 import { submitAudio } from "@/services/speechToTextServices";
 
@@ -88,9 +88,7 @@ async function setAudioDataFromInput(): Promise<boolean> {
 async function startRecording(): Promise<void> {
     audioChunks.value = [];
     recordingState.value = "pending";
-    supportedTypes.value = AudioType.typeList.filter((type) =>
-        MediaRecorder.isTypeSupported(type)
-    );
+    supportedTypes.value =Object.keys(MimeTypeMapper.mapping).filter(mimeType => MediaRecorder.isTypeSupported(mimeType));
     stream.value = await navigator.mediaDevices.getUserMedia({ audio: true })
     mediaRecorder.value = new MediaRecorder(stream.value)
     mediaRecorder.value.ondataavailable = (event) => {
@@ -114,8 +112,11 @@ async function stopRecording(): Promise<AudioData | null> {
     // 録音データを処理
     const audioData = new AudioData()
     const audioBlob = new Blob(audioChunks.value, { type: supportedTypes.value[0] });
+    console.log("supportedTypes.value[0]" )
+    console.log(supportedTypes.value[0] )
     const formattedDate = getFormattedDate();
-    audioData.audioFile = new File([audioBlob], `${formattedDate}.webm`, { type: supportedTypes.value[0] });
+    audioData.audioFile = new File([audioBlob], `${formattedDate}${MimeTypeMapper.getExtension(supportedTypes.value[0])}`, { type: supportedTypes.value[0] });
+    console.log(`${formattedDate}${MimeTypeMapper.getExtension(supportedTypes.value[0])}`, { type: supportedTypes.value[0] })
     const response = await submitAudio(audioData);
     audioData.audioFile = response.toFile()
     audioData.durationMs = response.durationMs
