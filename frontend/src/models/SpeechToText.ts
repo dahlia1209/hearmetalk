@@ -1,21 +1,36 @@
 import { v4 as uuidv4 } from 'uuid';
-export class AudioType {
-    public static typeList = [
-        "audio/webm",
-        "audio/webm; codecs=opus",
-        "audio/ogg",
-        "audio/ogg; codecs=opus",
-        "audio/ogg; codecs=vorbis",
-        "audio/wav",
-        "audio/x-wav",
-        "audio/mp4; codecs=mp4a.40.2 (AAC-LC)",
-        "audio/mp4; codecs=mp4a.40.5 (HE-AAC)",
-        "audio/aac",
-        "audio/aacp",
-        "audio/mpeg",
-        "audio/mp3",
-    ];
+
+export class MimeTypeMapper {
+    static mapping: { [mimeType: string]: string } = {
+        "audio/webm":".webm",
+        "audio/webm; codecs=opus":".webm",
+        "audio/ogg":".ogg",
+        "audio/ogg; codecs=opus":".ogg",
+        "audio/ogg; codecs=vorbis":".ogg",
+        "audio/wav":".wav",
+        "audio/x-wav":".x-wav",
+        "audio/mp4; codecs=mp4a.40.2 (AAC-LC)":".mp4",
+        "audio/mp4; codecs=mp4a.40.5 (HE-AAC)":".mp4",
+        "audio/aac":".aac",
+        "audio/aacp":".aacp",
+        "audio/mpeg":".mpeg",
+        "audio/mp3":".mp3",
+    };
+
+    static getExtension(mimeType: string): string | null {
+        return this.mapping[mimeType] || null;
+    }
+
+    static getMimeType(extension: string): string | null {
+        const pair = Object.entries(this.mapping).find(([_, ext]) => ext === extension);
+        return pair ? pair[0] : null;
+    }
 }
+
+// 使用例
+console.log(MimeTypeMapper.getExtension("image/jpeg")); // ".jpg"
+console.log(MimeTypeMapper.getMimeType(".png")); // "image/png"
+
 
 export class AudioDataDto {
     encodedData: string;
