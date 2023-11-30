@@ -34,11 +34,16 @@ jobs:
         run: zip -x "venv/*" -r release.zip .
         working-directory: ./backend
 
+      - name: List files in the directory
+        run: ls -l
+        working-directory: ./backend
+
       - name: Upload artifact for deployment jobs
         uses: actions/upload-artifact@v3
         with:
           name: python-app
           path: release.zip
+          working-directory: ./backend
 
   deploy:
     runs-on: ubuntu-latest
