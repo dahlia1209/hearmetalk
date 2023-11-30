@@ -31,7 +31,12 @@ jobs:
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
 
       - name: Zip artifact for deployment
-        run: zip -x "venv/*" -r release.zip .
+        run: |
+          echo 'zip before'
+          ls -l
+          zip -x "venv/*" -r release.zip .
+          echo 'zip after'
+          ls -l
         working-directory: ./backend
 
       - name: List files in the directory
@@ -42,8 +47,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: python-app
-          path: release.zip
-          working-directory: ./backend
+          path: ./backend/release.zip
 
   deploy:
     runs-on: ubuntu-latest
