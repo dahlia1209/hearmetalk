@@ -74,6 +74,7 @@ async function setAudioDataFromInput(): Promise<boolean> {
         audioData.filename = response.filename
         audioData.mimeType = response.mimeType
         audioData.text = response.text
+        audioData.text = response.text
         uploadedAudioData.value = audioData;
 
         uploadedAudioData.value.audioFile = inputFile
@@ -112,16 +113,17 @@ async function stopRecording(): Promise<AudioData | null> {
     // 録音データを処理
     const audioData = new AudioData()
     const audioBlob = new Blob(audioChunks.value, { type: supportedTypes.value[0] });
-    console.log("supportedTypes.value[0]" )
-    console.log(supportedTypes.value[0] )
     const formattedDate = getFormattedDate();
-    audioData.audioFile = new File([audioBlob], `${formattedDate}${MimeTypeMapper.getExtension(supportedTypes.value[0])}`, { type: supportedTypes.value[0] });
-    console.log(`${formattedDate}${MimeTypeMapper.getExtension(supportedTypes.value[0])}`, { type: supportedTypes.value[0] })
+    audioData.fileExtension = MimeTypeMapper.getExtension(supportedTypes.value[0]) ?? '';
+    audioData.filename = `${formattedDate}${MimeTypeMapper.getExtension(supportedTypes.value[0])}`
+    audioData.audioFile = new File([audioBlob], audioData.filename , { type: supportedTypes.value[0] });
+
+    // テキストデータ取得
     const response = await submitAudio(audioData);
-    audioData.audioFile = response.toFile()
+    
+    //取得データセット
+    // audioData.audioFile = response.toFile()
     audioData.durationMs = response.durationMs
-    audioData.fileExtension = response.fileExtension
-    audioData.filename = response.filename
     audioData.mimeType = response.mimeType
     audioData.text = response.text
     uploadedAudioData.value = audioData;

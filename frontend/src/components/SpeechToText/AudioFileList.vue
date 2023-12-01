@@ -8,8 +8,8 @@
                 audioData.audioFile.name
             }}</button>
             <div>
-                <img src="@/assets/rotate.svg" alt="rotate" class="svg-1" @click.stop="handleSubmitAudio(audioData, index)" v-if="recordingState==='stop'">
-                <img src="@/assets/spinner.svg" alt="spinner" class="svg-1"  v-else-if="recordingState==='pending'">
+                <img src="@/assets/rotate.svg" alt="rotate" class="svg-1" @click.stop="handleSubmitAudio(audioData, index)" v-if="isWaitingRefs[index]" ref="isWaitingRefs">
+                <img src="@/assets/spinner.svg" alt="spinner" class="svg-1"  v-else>
             </div>
             <img src="@/assets/TrashBin.svg" alt="TrashBin" class="svg-1" @click.stop="removeAudioData(index)">
         </div>
@@ -24,14 +24,16 @@ import { AudioData } from "@/models/SpeechToText"
 const props = defineProps<{ audioData: AudioData | null }>()
 const audioDataList = ref<AudioData[]>([]);
 const filesRefs = ref<HTMLElement[]>([]);
+const isWaitingRefs = ref<boolean[]>([]);
 const emit = defineEmits(['changedAudioDataList', 'audioDataSelected'])
 const selectedAudioDataIndex = ref<number | null>(null)
-const recordingState = ref<"recording" | "stop" | "pending">("stop");
+// const recordingState = ref<"recording" | "stop" | "pending">("stop");
 
 watch(props, () => {
     if (props.audioData) {
         console.log("AudioFileList:audioData を受け取りました")
         audioDataList.value.push(props.audioData)
+        isWaitingRefs.value.push(true)
     }
     emit('changedAudioDataList', audioDataList.value)
 })
@@ -43,8 +45,6 @@ watch(filesRefs.value, () => {
 })
 
 function audioDataSelected(audioData: AudioData, index: number) {
-    console.log("audioDataSelected")
-    console.log(audioData.text)
     selectedAudioDataIndex.value = index;
     emit('audioDataSelected', audioData)
 }
@@ -56,11 +56,12 @@ function removeAudioData(index: number) {
 
 async function handleSubmitAudio(audioData: AudioData, index: number) {
     try {
-        recordingState.value='pending'
+        console.log("handleSubmitAudio")
+        isWaitingRefs.value[index]=false
         const response = await submitAudio(audioData);
         audioDataList.value[index] = new AudioData(audioDataList.value[index].audioDataId, response.toFile(), response.durationMs, response.filename, response.mimeType, response.fileExtension, response.text)
         emit('audioDataSelected', audioDataList.value[index])
-        recordingState.value='stop'
+        isWaitingRefs.value[index]=true
     } catch (error) {
         console.error('Submit Error:', error);
     }
