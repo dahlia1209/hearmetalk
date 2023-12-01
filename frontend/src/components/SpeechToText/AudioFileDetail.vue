@@ -10,7 +10,7 @@
                     v-if="!isPlaying">
                 <img src="@/assets/stopReplay.svg" alt="stopReplay" class="svg-1" @click="stopAudio()" v-else>
             </div>
-            <audio ref="audioPlayer" @timeupdate="updateSlider" @ended="isPlaying = false"></audio>
+            <audio ref="audioPlayer" @timeupdate="updateSlider" @ended="handleEnded()"></audio>
 
             <div>{{ formatTime(currentTime) }}</div>
             <input type="range" min="0" :max="duration" v-model="currentTime" @input="seekAudio">
@@ -87,6 +87,11 @@ function formatTime(seconds: number) {
     const ss = s < 10 ? `0${s}` : s;
 
     return h > 0 ? `${hh}:${mm}:${ss}` : `${mm}:${ss}`;
+}
+
+function handleEnded(){
+    isPlaying.value = false
+    currentTime.value=0
 }
 
 </script>
