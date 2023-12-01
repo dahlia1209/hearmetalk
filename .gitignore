@@ -42,3 +42,6 @@ venv/
 
 # IDE - Visual Studio Code
 .vscode/
+
+# secret
+secret.json

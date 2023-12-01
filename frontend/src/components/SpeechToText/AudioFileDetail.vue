@@ -6,7 +6,8 @@
         </div>
         <div class="div-2">
             <div>
-                <img src="@/assets/replayButton.svg" alt="replayButton" class="svg-1" @click="playAudio()" v-if="!isPlaying">
+                <img src="@/assets/replayButton.svg" alt="replayButton" class="svg-1" @click="playAudio()"
+                    v-if="!isPlaying">
                 <img src="@/assets/stopReplay.svg" alt="stopReplay" class="svg-1" @click="stopAudio()" v-else>
             </div>
             <audio ref="audioPlayer" @timeupdate="updateSlider" @ended="isPlaying = false"></audio>
@@ -15,13 +16,13 @@
             <input type="range" min="0" :max="duration" v-model="currentTime" @input="seekAudio">
             <div>{{ formatTime(duration) }}s</div>
         </div>
-        <div class="div-3" v-if="audioData===null">サンプル音声をアップロードすると、ここに音声テキスト変換の結果が表示されます。</div>
-        <div  v-else>{{audioData.text}}</div>
+        <div class="div-3" v-if="audioData === null">サンプル音声をアップロードすると、ここに音声テキスト変換の結果が表示されます。</div>
+        <div v-else>{{ audioData.text }}</div>
     </div>
 </template>
 
 <script setup lang="ts">
-import {ref, watch,onMounted  } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { AudioData } from "@/models/SpeechToText"
 
 const props = defineProps<{ audioData: AudioData | null }>()
@@ -34,23 +35,19 @@ const currentTime = ref(0)
 watch(props, async () => {
     if (props.audioData) {
         audioData.value = props.audioData
+        console.log("audioData.value.durationMs/1000")
+        console.log(audioData.value.durationMs/1000)
+        duration.value = audioData.value.durationMs/1000
     }
     if (audioPlayer.value && audioData.value) {
         const audioUrl = URL.createObjectURL(audioData.value.audioFile);
         audioPlayer.value.src = audioUrl;
-        await getFileDuration()
-        duration.value = audioPlayer.value.duration
     }
 })
 
 async function getFileDuration() {
-    if (audioPlayer.value && duration.value!==null) {
-        audioPlayer.value.addEventListener('loadedmetadata', () => {
-            if (audioPlayer.value && duration.value!==null) {
-                // 再生時間を取得
-                duration.value = audioPlayer.value.duration;
-            }
-        });
+    if (audioData.value) {
+        duration.value = audioData.value.durationMs / 1000
     }
 }
 
@@ -116,7 +113,8 @@ function formatTime(seconds: number) {
     border-bottom: 2px solid;
     border-color: #EDEBE9;
 }
-.div-3{
+
+.div-3 {
     color: #605E5C;
     margin: auto;
 }

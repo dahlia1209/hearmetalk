@@ -1,7 +1,6 @@
 import os,tempfile
 import azure.cognitiveservices.speech as speechsdk
-from models.voice_chat import AudioData
-from models.voice_chat import AudioDataDto,AudioData
+from models.speech_to_text import AudioData,AudioDataDto
 
 def initialize_azure_speech_client():
     """Azureの音声クライアントを初期化します。"""
