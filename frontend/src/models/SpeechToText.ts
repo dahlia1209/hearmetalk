@@ -27,10 +27,6 @@ export class MimeTypeMapper {
     }
 }
 
-// 使用例
-console.log(MimeTypeMapper.getExtension("image/jpeg")); // ".jpg"
-console.log(MimeTypeMapper.getMimeType(".png")); // "image/png"
-
 
 export class AudioDataDto {
     encodedData: string;
