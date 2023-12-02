@@ -35,8 +35,6 @@ const currentTime = ref(0)
 watch(props, async () => {
     if (props.audioData) {
         audioData.value = props.audioData
-        console.log("audioData.value.durationMs/1000")
-        console.log(audioData.value.durationMs/1000)
         duration.value = audioData.value.durationMs/1000
     }
     if (audioPlayer.value && audioData.value) {

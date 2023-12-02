@@ -31,7 +31,6 @@ const selectedAudioDataIndex = ref<number | null>(null)
 
 watch(props, () => {
     if (props.audioData) {
-        console.log("AudioFileList:audioData を受け取りました")
         audioDataList.value.push(props.audioData)
         isWaitingRefs.value.push(true)
     }
@@ -56,10 +55,9 @@ function removeAudioData(index: number) {
 
 async function handleSubmitAudio(audioData: AudioData, index: number) {
     try {
-        console.log("handleSubmitAudio")
         isWaitingRefs.value[index]=false
         const response = await submitAudio(audioData);
-        audioDataList.value[index] = new AudioData(audioDataList.value[index].audioDataId, response.toFile(), response.durationMs, response.filename, response.mimeType, response.fileExtension, response.text)
+        audioData.text=response.text;
         emit('audioDataSelected', audioDataList.value[index])
         isWaitingRefs.value[index]=true
     } catch (error) {
