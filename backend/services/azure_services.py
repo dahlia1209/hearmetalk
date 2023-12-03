@@ -7,6 +7,7 @@ def initialize_azure_speech_client(speech_recognition_language=os.getenv('AZURE_
     """Azureの音声クライアントを初期化します。"""
     speech_key, service_region = os.getenv('AZURE_SPEECH_KEY'), os.getenv('AZURE_SERVICE_REGION')
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    speech_config.set_speech_synthesis_output_format(speechsdk.SpeechSynthesisOutputFormat.Audio16Khz128KBitRateMonoMp3)
     speech_config.speech_recognition_language = speech_recognition_language
     speech_config.speech_synthesis_voice_name = speech_synthesis_voice_name
     return speech_config

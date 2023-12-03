@@ -19,6 +19,7 @@
             <img src="@/assets/spinner.svg" class="img-2" v-else>
         </div>
         <audio ref="audioPlayerRef" controls><source :src="audioUrl" type="audio/mpeg"></audio>
+        <audio  controls><source :src="azure_mp3" type="audio/mpeg">サンプル</audio>
     </div>
 </template>
   
@@ -27,7 +28,7 @@ import { onMounted, ref } from 'vue';
 import { Speaker } from "@/models/TextToSpeech"
 import { AudioData, MimeTypeMapper } from "@/models/SpeechToText"
 import { submitText } from "@/services/textToSpeechServices";
-import pydub_mp3 from "@/assets/pydub_mp3.mp3"
+import azure_mp3 from "@/assets/92fbe433-8f55-4956-869d-6144c1a4e9dc.mp3"
 
 const currentInputLength = ref(0)
 const textareaRef = ref<HTMLTextAreaElement | null>(null)

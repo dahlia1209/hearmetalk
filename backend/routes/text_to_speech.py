@@ -22,7 +22,9 @@ def text_to_speech_endpoint()->Response:
     audio_data_dto.file_extension='.mp3'
     audio_data_dto.mime_type='audio/mpeg'
     audio_data_bytes =azure_services.synthesize(audio_data_dto.text,speaker.synthesis_voice_name) 
-    audio_data_dto.encoded_data=convert_and_encode_audio(audio_data_bytes,'mp3')
+    # audio_data_dto.encoded_data=convert_and_encode_audio(audio_data_bytes,'mp3')
+    encoded_data  = base64.b64encode(audio_data_bytes).decode('utf-8')
+    audio_data_dto.encoded_data=encoded_data
 
     #return 
     return jsonify(audio_data_dto.model_dump(by_alias=True)), 200
