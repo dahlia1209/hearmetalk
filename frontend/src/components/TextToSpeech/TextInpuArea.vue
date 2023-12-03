@@ -18,11 +18,7 @@
             </button>
             <img src="@/assets/spinner.svg" class="img-2" v-else>
         </div>
-        <audio ref="audioPlayerRef"></audio>
-
-        <audio ref="tempPlayerRef" controls>
-            <source :src="pydub_mp3" type="audio/mpeg">
-        </audio>
+        <audio ref="audioPlayerRef" controls><source :src="audioUrl" type="audio/mpeg"></audio>
     </div>
 </template>
   
@@ -42,6 +38,7 @@ const audioData = ref<AudioData>(new AudioData())
 const audioPlayerRef = ref<HTMLAudioElement | null>(null)
 const submitedSpeaker = ref<Speaker>(Speaker.getSpeaker('Nanami'))
 const isWaiting = ref(true)
+const audioUrl=ref("")
 
 const tempPlayerRef = ref<HTMLAudioElement | null>(null)
 
@@ -74,8 +71,11 @@ async function handleSubmitText() {
                 });
             }
             audioPlayerRef.value.src = URL.createObjectURL(response.audioFile);
+            audioUrl.value=audioPlayerRef.value.src
+            
             console.log(response.text)
             audioPlayerRef.value.load()
+            tempPlayerRef.value?.load()
         }else{
             audioPlayerRef.value.oncanplaythrough = () => {
                 audioPlayerRef.value?.play().then(() => {
