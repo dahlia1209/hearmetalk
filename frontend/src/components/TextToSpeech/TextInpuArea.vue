@@ -11,11 +11,14 @@
         <textarea class="textarea-1" @input="handleTextInput()" ref="textareaRef"
             placeholder="ここに自身のテキストを入力または貼り付け、[再生] ボタンをクリックして音声を聞きます。"></textarea>
         <span class="span-1">{{ currentInputLength }} / 500 文字</span>
-        <button type="button" class="button-1" @click="handleSubmitText()">
-            <img src="@/assets/rightPointingTriangle.svg" class="img-1">
-            <span class="span-2">再生</span>
-            <audio ref="audioPlayerRef"></audio>
-        </button>
+        <div class="div-2">
+            <button type="button" class="button-1" @click="handleSubmitText()" v-if="isWaiting">
+                <img src="@/assets/rightPointingTriangle.svg" class="img-1">
+                <span class="span-2">再生</span>
+            </button>
+            <img src="@/assets/spinner.svg" class="img-2" v-else>
+        </div>
+        <audio ref="audioPlayerRef"></audio>
     </div>
 </template>
   
@@ -33,6 +36,7 @@ const errorMessage = ref("")
 const audioData = ref<AudioData>(new AudioData())
 const audioPlayerRef = ref<HTMLAudioElement | null>(null)
 const submitedSpeaker=ref<Speaker>(Speaker.getSpeaker('Nanami'))
+const isWaiting=ref(true)
 
 function handleTextInput() {
     if (textareaRef.value) {
@@ -44,6 +48,7 @@ function handleTextInput() {
 }
 
 async function handleSubmitText() {
+    isWaiting.value=false
     const supportedTypes = Object.keys(MimeTypeMapper.mapping).filter(mimeType => MediaRecorder.isTypeSupported(mimeType));
     if (selectedSpeaker.value && textareaRef.value && textareaRef.value.value && supportedTypes.length > 0 && audioPlayerRef.value) {
         if (audioData.value.text !== textareaRef.value.value || submitedSpeaker.value!==selectedSpeaker.value) {
@@ -67,6 +72,7 @@ async function handleSubmitText() {
     } else if (!audioPlayerRef.value) {
         errorMessage.value = "ページを再読み込みして再度試してください"
     }
+    isWaiting.value=true
 }
 
 </script>
@@ -115,10 +121,13 @@ async function handleSubmitText() {
     border: none;
     cursor: pointer;
     width: 100px;
-    align-self: center;
 }
 
 .img-1 {
+    height: 36px;
+}
+
+.img-2 {
     height: 36px;
 }
 
@@ -131,6 +140,10 @@ async function handleSubmitText() {
 
 .div-1 {
     margin-bottom: 12px;
+}
 
+.div-2 {
+    display: flex;
+    justify-content: center;
 }
 </style>
