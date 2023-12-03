@@ -18,7 +18,7 @@
             </button>
             <img src="@/assets/spinner.svg" class="img-2" v-else>
         </div>
-        <audio ref="audioPlayerRef" controls><source :src="audioUrl" type="audio/mpeg"></audio>
+        <audio ref="audioPlayerRef" controls></audio>
         <audio  controls><source :src="azure_mp3" type="audio/mpeg">サンプル</audio>
     </div>
 </template>
@@ -71,7 +71,9 @@ async function handleSubmitText() {
                     console.error('再生開始エラー:', error);
                 });
             }
-            audioPlayerRef.value.src = URL.createObjectURL(response.audioFile);
+            audioPlayerRef.value.src ='data:audio/mpeg;base64,'+response.encodedData
+            // audioPlayerRef.value.src =URL.createObjectURL(response.audioFile)
+            
             audioUrl.value=audioPlayerRef.value.src
             
             console.log(response.text)

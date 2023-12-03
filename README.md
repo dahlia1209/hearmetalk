@@ -44,3 +44,7 @@ az deployment group create --resource-group "nakamura-rg-99" --template-file ".\
 
 # リソース削除
 az group delete -n nakamura-rg-99 -y
+
+# 再デプロイ
+az webapp up -g nakamura-rg-99 -n nakamura-app-01 -p appserviceplan-nakamura-app-01 --runtime PYTHON:3.11 --sku B1
+az webapp restart -g nakamura-rg-99 -n nakamura-app-01

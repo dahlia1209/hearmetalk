@@ -64,7 +64,12 @@ export class AudioDataDto {
         for (let i = 0; i < len; i++) {
             bytes[i] = binaryString.charCodeAt(i);
         }
+        console.log("mimeType")
+        console.log(mimeType)
         const blob= new Blob([bytes], { type: mimeType });
+        const file=new File([blob],filename)
+        console.log("file.type")
+        console.log(file.type)
         return new File([blob],filename)
     }
 }
