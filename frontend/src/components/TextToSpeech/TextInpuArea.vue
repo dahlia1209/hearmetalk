@@ -61,6 +61,7 @@ async function handleSubmitText() {
             audioPlayerRef.value.src = URL.createObjectURL(response.audioFile);
             console.log(response.text)
         }
+        audioPlayerRef.value.load()
         audioPlayerRef.value.play()
 
     } else if (!selectedSpeaker.value) {
