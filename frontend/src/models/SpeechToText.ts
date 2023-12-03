@@ -9,6 +9,8 @@ export class MimeTypeMapper {
         "audio/ogg; codecs=vorbis":".ogg",
         "audio/wav":".wav",
         "audio/x-wav":".x-wav",
+        "audio/mp4; codecs=mp4a.40.2 (AAC-LC)":".mp4",
+        "audio/mp4; codecs=mp4a.40.5 (HE-AAC)":".mp4",
         "audio/aac":".aac",
         "audio/aacp":".aacp",
         "audio/mpeg":".mpeg",
