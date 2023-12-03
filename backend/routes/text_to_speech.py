@@ -20,7 +20,7 @@ def text_to_speech_endpoint()->Response:
     # Azure Speech SDKを使ってオーディオデータに変換
     # target_format=audio_data_dto.file_extension.replace('.','') #「.」を除外
     audio_data_dto.file_extension='.mp3'
-    audio_data_dto.mime_type='audio/mp3'
+    audio_data_dto.mime_type='audio/mpeg'
     audio_data_bytes =azure_services.synthesize(audio_data_dto.text,speaker.synthesis_voice_name) 
     audio_data_dto.encoded_data=convert_and_encode_audio(audio_data_bytes,'mp3')
 
