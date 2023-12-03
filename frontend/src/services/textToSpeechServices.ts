@@ -20,6 +20,7 @@ export const submitText = async (audioData: AudioData, speaker: Speaker): Promis
             audioFile: AudioDataDto.toFile(response.data.encodedData, response.data.fileExtension, filename),
             durationMs: response.data.durationMs,
             fileExtension: response.data.fileExtension,
+            mimeType: response.data.mimeType,
             filename: filename
         };
         console.info(respnseAudioData);
