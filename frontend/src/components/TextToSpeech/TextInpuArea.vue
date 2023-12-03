@@ -35,8 +35,8 @@ const speakers = Speaker.speakers
 const errorMessage = ref("")
 const audioData = ref<AudioData>(new AudioData())
 const audioPlayerRef = ref<HTMLAudioElement | null>(null)
-const submitedSpeaker=ref<Speaker>(Speaker.getSpeaker('Nanami'))
-const isWaiting=ref(true)
+const submitedSpeaker = ref<Speaker>(Speaker.getSpeaker('Nanami'))
+const isWaiting = ref(true)
 
 function handleTextInput() {
     if (textareaRef.value) {
@@ -48,13 +48,13 @@ function handleTextInput() {
 }
 
 async function handleSubmitText() {
-    isWaiting.value=false
+    isWaiting.value = false
     const supportedTypes = Object.keys(MimeTypeMapper.mapping).filter(mimeType => MediaRecorder.isTypeSupported(mimeType));
     if (selectedSpeaker.value && textareaRef.value && textareaRef.value.value && supportedTypes.length > 0 && audioPlayerRef.value) {
-        if (audioData.value.text !== textareaRef.value.value || submitedSpeaker.value!==selectedSpeaker.value) {
+        if (audioData.value.text !== textareaRef.value.value || submitedSpeaker.value !== selectedSpeaker.value) {
             console.log("submitText")
             audioData.value.text = textareaRef.value.value;
-            submitedSpeaker.value=selectedSpeaker.value
+            submitedSpeaker.value = selectedSpeaker.value
             audioData.value.mimeType = supportedTypes[0];
             audioData.value.fileExtension = MimeTypeMapper.getExtension(audioData.value.mimeType) ?? "";
             const response = await submitText(audioData.value, submitedSpeaker.value)
@@ -62,7 +62,11 @@ async function handleSubmitText() {
             console.log(response.text)
         }
         audioPlayerRef.value.load()
-        audioPlayerRef.value.play()
+        audioPlayerRef.value.play().then(() => {
+            console.log('再生が開始されました');
+        }).catch((error) => {
+            console.error('再生開始エラー:', error);
+        });
 
     } else if (!selectedSpeaker.value) {
         errorMessage.value = "スピーカーを選択して下さい"
@@ -73,7 +77,7 @@ async function handleSubmitText() {
     } else if (!audioPlayerRef.value) {
         errorMessage.value = "ページを再読み込みして再度試してください"
     }
-    isWaiting.value=true
+    isWaiting.value = true
 }
 
 </script>
