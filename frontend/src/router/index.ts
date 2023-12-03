@@ -1,12 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '@/views/Home.vue'
-// import AudioTranscription from '@/components/AudioTranscription.vue'
-// import VoiceOutput from '@/components/VoiceOutput.vue';
 import Chat from '@/views/Chat.vue'; 
 import Speech_to_Text from '@/views/SpeechToText.vue'; 
-// import Orchestration from '@/components/Orchestration.vue'; 
-// import VoiceTranscription from '@/components/VoiceTranscription.vue'; 
-// import AITalk from '@/components/AITalk.vue'; 
+import Text_to_Speech from '@/views/TextToSpeechView.vue'; 
 
 const routes = [
   {
@@ -19,36 +15,16 @@ const routes = [
     name: 'SpeechToText',
     component: Speech_to_Text 
   },
-  // {
-  //   path: '/transcribe',
-  //   name: 'AudioTranscription',
-  //   component: AudioTranscription
-  // },
-  // {
-  //   path: '/voiceoutput',
-  //   name: 'VoiceOutput',
-  //   component: VoiceOutput
-  // },
+  {
+    path: '/text-to-speech',
+    name: 'TextToSpeech',
+    component: Text_to_Speech 
+  },
   {
     path: '/chat',
     name: 'Chat',
     component: Chat  
   },
-  // {
-  //   path: '/orchestrate',
-  //   name: 'Orchestration',
-  //   component: Orchestration  
-  // },
-  // {
-  //   path: '/ai-talk',
-  //   name: 'AITalk',
-  //   component: AITalk  
-  // },
-  // {
-  //   path: '/voice-transcription',
-  //   name: 'VoiceTranscription',
-  //   component: VoiceTranscription  
-  // }
 ]
 
 const router = createRouter({
