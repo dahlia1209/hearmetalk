@@ -1,7 +1,5 @@
 import axios from 'axios';
-import { Message, ChatCompletionSettings } from "@/models/Chat"
-import { AudioDataDto } from "@/models/SpeechToText"
-import { AudioData } from "@/models/SpeechToText"
+import { AudioDataDto,AudioData } from "@/models/SpeechToText"
 
 export const submitAudio = async (audioData: AudioData): Promise<AudioDataDto> => {
     try {

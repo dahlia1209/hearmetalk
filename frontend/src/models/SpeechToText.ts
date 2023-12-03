@@ -56,17 +56,16 @@ export class AudioDataDto {
         return new File([blob],this.filename)
     }
 
-    toAudioData(): AudioData {
-        const audioFile = this.toFile(); // AudioDataDtoのtoFileメソッドを使用してFileオブジェクトを取得
-        return new AudioData(
-            uuidv4(),
-            audioFile, 
-            this.durationMs, 
-            this.filename, 
-            this.mimeType, 
-            this.fileExtension, 
-            this.text
-        );
+    // いずれstaic に統一したい
+    static toFile(encodedData:string,mimeType:string,filename:string): File {
+        const binaryString = window.atob(encodedData);
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        const blob= new Blob([bytes], { type: mimeType });
+        return new File([blob],filename)
     }
 }
 
@@ -88,5 +87,44 @@ export class AudioData {
         this.fileExtension = fileExtension;
         this.text = text;
     }
-
 }
+
+// export interface AudioDataDtoResponse{
+//     encoded_data: string;
+//     duration_ms : number;
+//     filename: string;
+//     mime_type: string;
+//     file_extension:string;
+//     text:string;
+    
+//     toFile(): File
+// }
+
+// export class AudioDataDtoResponse{
+//     encoded_data: string;
+//     duration_ms : number;
+//     filename: string;
+//     mime_type: string;
+//     file_extension:string;
+//     text:string;
+
+//     constructor(encoded_data: string, duration_ms: number, filename: string, mime_type: string, file_extension: string, text: string) {
+//         this.encoded_data = encoded_data;
+//         this.duration_ms = duration_ms;
+//         this.filename = filename;
+//         this.mime_type = mime_type;
+//         this.file_extension = file_extension;
+//         this.text = text;
+//     }
+
+//     toFile(): File {
+//         const binaryString = window.atob(this.encoded_data);
+//         const len = binaryString.length;
+//         const bytes = new Uint8Array(len);
+//         for (let i = 0; i < len; i++) {
+//             bytes[i] = binaryString.charCodeAt(i);
+//         }
+//         const blob= new Blob([bytes], { type: this.mime_type });
+//         return new File([blob],this.filename)
+//     }
+// }

@@ -23,6 +23,7 @@
 import { AudioData,MimeTypeMapper } from "@/models/SpeechToText"
 import {  onMounted, ref } from 'vue';
 import { submitAudio } from "@/services/speechToTextServices";
+import { getFormattedDate } from "@/utils/dateUtils";
 
 const props = defineProps<{ audioDataList: AudioData[] }>()
 const recordingState = ref<"recording" | "stop" | "pending">("stop");
@@ -115,7 +116,7 @@ async function stopRecording(): Promise<AudioData | null> {
     const audioBlob = new Blob(audioChunks.value, { type: supportedTypes.value[0] });
     const formattedDate = getFormattedDate();
     audioData.fileExtension = MimeTypeMapper.getExtension(supportedTypes.value[0]) ?? '';
-    audioData.filename = `${formattedDate}${MimeTypeMapper.getExtension(supportedTypes.value[0])}`
+    audioData.filename = `${formattedDate}${audioData.fileExtension}`
     audioData.audioFile = new File([audioBlob], audioData.filename , { type: supportedTypes.value[0] });
 
     // テキストデータ取得
@@ -148,21 +149,6 @@ async function handleStopRecording() {
 async function handleStartRecording() {
     await startRecording();
 }
-
-function getFormattedDate(): string {
-    // 現在の日時を取得
-    const now = new Date();
-
-    // 日時を 'yyyyMMdd_hhmmss' 形式に整形
-    const yyyy = now.getFullYear();
-    const MM = String(now.getMonth() + 1).padStart(2, '0'); // 月は0から始まるため+1する
-    const dd = String(now.getDate()).padStart(2, '0');
-    const hh = String(now.getHours()).padStart(2, '0');
-    const mm = String(now.getMinutes()).padStart(2, '0');
-    const ss = String(now.getSeconds()).padStart(2, '0');
-    return `${yyyy}${MM}${dd}_${hh}${mm}${ss}`;
-}
-
 
 </script>
   
