@@ -19,6 +19,10 @@
             <img src="@/assets/spinner.svg" class="img-2" v-else>
         </div>
         <audio ref="audioPlayerRef"></audio>
+
+        <audio ref="tempPlayerRef" controls>
+            <source :src="pydub_mp3" type="audio/mpeg">
+        </audio>
     </div>
 </template>
   
@@ -27,6 +31,7 @@ import { onMounted, ref } from 'vue';
 import { Speaker } from "@/models/TextToSpeech"
 import { AudioData, MimeTypeMapper } from "@/models/SpeechToText"
 import { submitText } from "@/services/textToSpeechServices";
+import pydub_mp3 from "@/assets/pydub_mp3.mp3"
 
 const currentInputLength = ref(0)
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
@@ -37,6 +42,9 @@ const audioData = ref<AudioData>(new AudioData())
 const audioPlayerRef = ref<HTMLAudioElement | null>(null)
 const submitedSpeaker = ref<Speaker>(Speaker.getSpeaker('Nanami'))
 const isWaiting = ref(true)
+
+const tempPlayerRef = ref<HTMLAudioElement | null>(null)
+
 
 function handleTextInput() {
     if (textareaRef.value) {
@@ -58,15 +66,27 @@ async function handleSubmitText() {
             audioData.value.mimeType = supportedTypes[0];
             audioData.value.fileExtension = MimeTypeMapper.getExtension(audioData.value.mimeType) ?? "";
             const response = await submitText(audioData.value, submitedSpeaker.value)
+            audioPlayerRef.value.oncanplaythrough = () => {
+                audioPlayerRef.value?.play().then(() => {
+                    console.log('再生が開始されました');
+                }).catch((error) => {
+                    console.error('再生開始エラー:', error);
+                });
+            }
             audioPlayerRef.value.src = URL.createObjectURL(response.audioFile);
             console.log(response.text)
+            audioPlayerRef.value.load()
+        }else{
+            audioPlayerRef.value.oncanplaythrough = () => {
+                audioPlayerRef.value?.play().then(() => {
+                    console.log('再生が開始されました');
+                }).catch((error) => {
+                    console.error('再生開始エラー:', error);
+                });
+            }
+            audioPlayerRef.value.load()
         }
-        audioPlayerRef.value.load()
-        audioPlayerRef.value.play().then(() => {
-            console.log('再生が開始されました');
-        }).catch((error) => {
-            console.error('再生開始エラー:', error);
-        });
+
 
     } else if (!selectedSpeaker.value) {
         errorMessage.value = "スピーカーを選択して下さい"
