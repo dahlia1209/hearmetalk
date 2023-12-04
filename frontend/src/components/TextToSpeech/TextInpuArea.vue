@@ -18,15 +18,14 @@
             </button>
             <img src="@/assets/spinner.svg" class="img-2" v-else>
         </div>
-        <audio ref="audioPlayerRef" controls></audio>
-        <audio  controls><source :src="azure_mp3" type="audio/mpeg">サンプル</audio>
+        <audio ref="audioPlayerRef" controls class="audio-1"></audio>
     </div>
 </template>
   
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { Speaker } from "@/models/TextToSpeech"
-import { AudioData, MimeTypeMapper } from "@/models/SpeechToText"
+import { AudioData, MimeTypeMapper, AudioDataDto } from "@/models/SpeechToText"
 import { submitText } from "@/services/textToSpeechServices";
 import azure_mp3 from "@/assets/92fbe433-8f55-4956-869d-6144c1a4e9dc.mp3"
 
@@ -37,12 +36,7 @@ const speakers = Speaker.speakers
 const errorMessage = ref("")
 const audioData = ref<AudioData>(new AudioData())
 const audioPlayerRef = ref<HTMLAudioElement | null>(null)
-const submitedSpeaker = ref<Speaker>(Speaker.getSpeaker('Nanami'))
 const isWaiting = ref(true)
-const audioUrl=ref("")
-
-const tempPlayerRef = ref<HTMLAudioElement | null>(null)
-
 
 function handleTextInput() {
     if (textareaRef.value) {
@@ -55,15 +49,14 @@ function handleTextInput() {
 
 async function handleSubmitText() {
     isWaiting.value = false
+    errorMessage.value=""
     const supportedTypes = Object.keys(MimeTypeMapper.mapping).filter(mimeType => MediaRecorder.isTypeSupported(mimeType));
     if (selectedSpeaker.value && textareaRef.value && textareaRef.value.value && supportedTypes.length > 0 && audioPlayerRef.value) {
-        if (audioData.value.text !== textareaRef.value.value || submitedSpeaker.value !== selectedSpeaker.value) {
             console.log("submitText")
             audioData.value.text = textareaRef.value.value;
-            submitedSpeaker.value = selectedSpeaker.value
             audioData.value.mimeType = supportedTypes[0];
             audioData.value.fileExtension = MimeTypeMapper.getExtension(audioData.value.mimeType) ?? "";
-            const response = await submitText(audioData.value, submitedSpeaker.value)
+            const response = await submitText(audioData.value, selectedSpeaker.value)
             audioPlayerRef.value.oncanplaythrough = () => {
                 audioPlayerRef.value?.play().then(() => {
                     console.log('再生が開始されました');
@@ -71,26 +64,9 @@ async function handleSubmitText() {
                     console.error('再生開始エラー:', error);
                 });
             }
-            audioPlayerRef.value.src ='data:audio/mpeg;base64,'+response.encodedData
-            // audioPlayerRef.value.src =URL.createObjectURL(response.audioFile)
-            
-            audioUrl.value=audioPlayerRef.value.src
-            
-            console.log(response.text)
+            audioPlayerRef.value.src = 'data:audio/mpeg;base64,' + response.encodedData
             audioPlayerRef.value.load()
-            tempPlayerRef.value?.load()
-        }else{
-            audioPlayerRef.value.oncanplaythrough = () => {
-                audioPlayerRef.value?.play().then(() => {
-                    console.log('再生が開始されました');
-                }).catch((error) => {
-                    console.error('再生開始エラー:', error);
-                });
-            }
-            audioPlayerRef.value.load()
-        }
-
-
+            
     } else if (!selectedSpeaker.value) {
         errorMessage.value = "スピーカーを選択して下さい"
     } else if (textareaRef.value && !textareaRef.value.value) {
@@ -103,6 +79,19 @@ async function handleSubmitText() {
     isWaiting.value = true
 }
 
+function convertURIToBinary(dataURI: string): Uint8Array {
+    let BASE64_MARKER = ';base64,';
+    let base64Index = dataURI.indexOf(BASE64_MARKER) + BASE64_MARKER.length;
+    let base64 = dataURI.substring(base64Index);
+    let raw = window.atob(base64);
+    let rawLength = raw.length;
+    let arr = new Uint8Array(new ArrayBuffer(rawLength));
+
+    for (let i = 0; i < rawLength; i++) {
+        arr[i] = raw.charCodeAt(i);
+    }
+    return arr;
+}
 </script>
   
 <style scoped>
@@ -156,6 +145,7 @@ async function handleSubmitText() {
 }
 
 .img-2 {
+    margin-top: 12px;
     height: 36px;
 }
 
@@ -173,5 +163,13 @@ async function handleSubmitText() {
 .div-2 {
     display: flex;
     justify-content: center;
+}
+
+.source-1{
+    justify-self: center;
+}
+.audio-1{
+    align-self: center;
+    margin-top: 12px;
 }
 </style>

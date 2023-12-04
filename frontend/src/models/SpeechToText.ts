@@ -60,7 +60,7 @@ export class AudioDataDto {
     static toFile(encodedData:string,mimeType:string,filename:string): File {
         const binaryString = window.atob(encodedData);
         const len = binaryString.length;
-        const bytes = new Uint8Array(len);
+        const bytes = new Uint8Array(new ArrayBuffer(len));
         for (let i = 0; i < len; i++) {
             bytes[i] = binaryString.charCodeAt(i);
         }
