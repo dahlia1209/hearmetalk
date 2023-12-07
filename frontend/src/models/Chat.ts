@@ -1,12 +1,15 @@
+import { v4 as uuidv4 } from "uuid";
 export class Message {
     public messageId: string;
     public content: string;
     public role: "user" | "assistant" | "system";
+    public roleDisplay:string;
 
-    constructor(messageId: string = "",  content: string = "", role: "user" | "assistant" | "system" = "user") {
+    constructor(messageId: string = uuidv4(),  content: string = "", role: "user" | "assistant" | "system" = "user",roleDisplay="") {
         this.messageId = messageId;
         this.content = content;
         this.role = role;
+        this.roleDisplay=roleDisplay
     }
 
     toDto(): MessageDto {

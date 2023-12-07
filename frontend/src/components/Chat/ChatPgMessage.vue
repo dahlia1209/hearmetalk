@@ -25,6 +25,7 @@
 import { v4 as uuidv4 } from "uuid";
 import { onMounted, ref, withDefaults, } from 'vue';
 import { Message } from "@/models/Chat"
+import { resize } from "@/utils/htmlElementUtils"
 
 export interface Props {
   message?: Message
@@ -42,10 +43,6 @@ onMounted(() => {
 const ischatpgessageVisible = ref(true)
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
 
-function resize(textarea: HTMLTextAreaElement) {
-  textarea.style.height = 'auto';
-  textarea.style.height = (textarea.scrollHeight) + 'px';
-};
 function deleteMessage() {
   ischatpgessageVisible.value = !ischatpgessageVisible.value;
 }
