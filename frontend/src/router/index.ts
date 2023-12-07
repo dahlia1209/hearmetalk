@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '@/views/Home.vue'
 import Chat from '@/views/Chat.vue'; 
+import VoiceChat from '@/views/VoiceChatView.vue'; 
 import Speech_to_Text from '@/views/SpeechToText.vue'; 
 import Text_to_Speech from '@/views/TextToSpeechView.vue'; 
 
@@ -24,6 +25,11 @@ const routes = [
     path: '/chat',
     name: 'Chat',
     component: Chat  
+  },
+  {
+    path: '/voice-chat',
+    name: 'VoiceChat',
+    component: VoiceChat  
   },
 ]
 
