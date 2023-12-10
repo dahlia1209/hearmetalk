@@ -1,28 +1,30 @@
 # hearmetalk
 
-## Project setup
+## Frontend Project setup
+### モジュールのインストール
 ```
+cd ./frontend
 npm install
 ```
 
 ### Compiles and hot-reloads for development
 ```
-npm run serve
+npm run dev
 ```
 
 ### Compiles and minifies for production
 ```
 npm run build
+npm run serve
 ```
 
 ### Lints and fixes files
 ```
 npm run lint
 ```
+## Backend Project setup
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
-
+## Resources
 
 ### GitHub
 https://github.com/dahlia1209/hearmetalk.git
@@ -31,6 +33,9 @@ https://github.com/dahlia1209/hearmetalk.git
 
 ### Web Site
 https://ashy-mushroom-062ed5b10.4.azurestaticapps.net/
+
+### API endpoint
+https://nakamura-app-01.azurewebsites.net/
 
 
 ### リソース構築メモ
