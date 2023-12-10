@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="chat-area">
     <SystemMessageBox @update-system-message="systemMessageUpdate($event)" />
     <chat-panel @update-messages="messagesUpdate($event)" ref="chatPanel" />
     <div class="chat-pg-footer">
@@ -64,6 +64,9 @@ async function submitForm() {
 </script>
 
 <style scoped>
+.chat-area{
+  width: 100%;
+}
 .btn-submit {
   padding: 5px 12px 7px;
   border: none;

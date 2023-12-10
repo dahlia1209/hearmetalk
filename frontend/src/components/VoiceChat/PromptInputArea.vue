@@ -3,7 +3,7 @@
         <div v-for="message in messages" :key="message.messageId">
             {{ message.roleDisplay }}：{{ message.content }}
         </div>
-        <audio ref="audioPlayerRef" ></audio>
+        <audio ref="audioPlayerRef"></audio>
         <div class="div-2">
             <button type="button" class="button-1" :disabled="!isWaitingForSubmit || recordingState !== 'stop'"
                 v-if="recordingState === 'stop'" @click="handleStartRecording()"><img src="@/assets/MicIcon.svg"
@@ -15,15 +15,16 @@
         または
         <div class="div-1">
             <textarea class="textarea-1" placeholder="メッセージを入力してください" rows="1"
-                @input="textareaRef === null ? null : resize(textareaRef)" ref="textareaRef"  v-model="textareaInput"></textarea>
-            <button class="button-1" :disabled="!isWaitingForSubmit || !recordingState" @click="handleSubmitButton(textareaInput)"><img
-                    src="@/assets/submit.svg"></button>
+                @input="textareaRef === null ? null : resize(textareaRef)" ref="textareaRef"
+                v-model="textareaInput"></textarea>
+            <button class="button-1" :disabled="!isWaitingForSubmit || !recordingState"
+                @click="handleSubmitButton(textareaInput)"><img src="@/assets/submit.svg"></button>
         </div>
     </div>
 </template>
 <script setup lang="ts">
 import { resize } from "@/utils/htmlElementUtils"
-import { onMounted, ref, } from 'vue';
+import { onMounted, ref, watch, } from 'vue';
 import { Message, ChatCompletionSettings, MessageDto } from "@/models/Chat"
 import { submitChat } from "@/services/chatServices"
 import { submitAudio } from "@/services/speechToTextServices";
@@ -32,6 +33,15 @@ import { AudioData, MimeTypeMapper } from "@/models/SpeechToText"
 import { Speaker } from "@/models/TextToSpeech"
 import { submitText } from "@/services/textToSpeechServices";
 
+export interface Props {
+    settings: boolean
+};
+
+const props = withDefaults(defineProps<Props>(), {
+    settings: true
+})
+
+const isSpeechEnabled = ref(props.settings)
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
 const isWaitingForSubmit = ref(true)
 const recordingState = ref<"recording" | "stop" | "pending">("stop");
@@ -42,15 +52,19 @@ const supportedTypes = ref<string[]>([])
 const stream = ref<MediaStream | null>(null);
 const mediaRecorder = ref<MediaRecorder | null>(null);
 const uploadedAudioData = ref<AudioData | null>(null);
-const textareaInput=ref<string>("")
+const textareaInput = ref<string>("")
 const errorMessage = ref("")
 const selectedSpeaker = ref<Speaker>(Speaker.getSpeaker('Nanami'))
 const audioData = ref<AudioData>(new AudioData())
 const audioPlayerRef = ref<HTMLAudioElement | null>(null)
 
+watch(props,()=>{
+    isSpeechEnabled.value=props.settings
+})
 
-async function handleSubmitButton(textareaInput:string) {
-    if (textareaInput==="") {
+
+async function handleSubmitButton(textareaInput: string) {
+    if (textareaInput === "") {
         console.error('メッセージを入力してください');
         return
     } else {
@@ -58,8 +72,8 @@ async function handleSubmitButton(textareaInput:string) {
             isWaitingForSubmit.value = false
             const message = new Message()
             message.content = textareaInput
-            message.role="user"
-            message.roleDisplay="あなた"
+            message.role = "user"
+            message.roleDisplay = "あなた"
             messages.value.push(message)
             const messageDtos = systemmessage.value.content == "" ?
                 [...messages.value.map(message => message.toDto())] :
@@ -67,10 +81,12 @@ async function handleSubmitButton(textareaInput:string) {
             const chatCompletionSettings = new ChatCompletionSettings("gpt-4", messageDtos);
 
             const response = await submitChat(chatCompletionSettings);
-            response.roleDisplay="ChatAI"
+            response.roleDisplay = "ChatAI"
             messages.value.push(response)
-            console.log("handleSubmitText")
-            handleSubmitText(response.content)
+            if (isSpeechEnabled.value) {
+                console.log("handleSubmitText")
+                handleSubmitText(response.content)
+            }
             isWaitingForSubmit.value = true
         } catch (error) {
             console.error('Submit Error:', error);
@@ -137,28 +153,28 @@ async function handleStopRecording() {
     }
 }
 
-async function handleSubmitText(text:string) {
-    errorMessage.value=""
+async function handleSubmitText(text: string) {
+    errorMessage.value = ""
     const supportedTypes = Object.keys(MimeTypeMapper.mapping).filter(mimeType => MediaRecorder.isTypeSupported(mimeType));
     if (selectedSpeaker.value && text && supportedTypes.length > 0 && audioPlayerRef.value) {
-            console.log("submitText")
-            audioData.value.text = text;
-            audioData.value.mimeType = supportedTypes[0];
-            audioData.value.fileExtension = MimeTypeMapper.getExtension(audioData.value.mimeType) ?? "";
-            const response = await submitText(audioData.value, selectedSpeaker.value)
-            audioPlayerRef.value.oncanplaythrough = () => {
-                audioPlayerRef.value?.play().then(() => {
-                    console.log('再生が開始されました');
-                }).catch((error) => {
-                    console.error('再生開始エラー:', error);
-                });
-            }
-            audioPlayerRef.value.src = 'data:audio/mpeg;base64,' + response.encodedData
-            audioPlayerRef.value.load()
-            
+        console.log("submitText")
+        audioData.value.text = text;
+        audioData.value.mimeType = supportedTypes[0];
+        audioData.value.fileExtension = MimeTypeMapper.getExtension(audioData.value.mimeType) ?? "";
+        const response = await submitText(audioData.value, selectedSpeaker.value)
+        audioPlayerRef.value.oncanplaythrough = () => {
+            audioPlayerRef.value?.play().then(() => {
+                console.log('再生が開始されました');
+            }).catch((error) => {
+                console.error('再生開始エラー:', error);
+            });
+        }
+        audioPlayerRef.value.src = 'data:audio/mpeg;base64,' + response.encodedData
+        audioPlayerRef.value.load()
+
     } else if (!selectedSpeaker.value) {
         errorMessage.value = "スピーカーを選択して下さい"
-    } else if (text==="") {
+    } else if (text === "") {
         errorMessage.value = "テキストを入力してください"
     } else if (supportedTypes.length === 0) {
         errorMessage.value = "このブラウザではサポートされていません"
@@ -179,6 +195,7 @@ async function handleStartRecording() {
 .prompt-input-area {
     flex: display;
     flex-direction: column;
+    text-align: center;
 }
 
 .div-1 {
