@@ -42,5 +42,6 @@ function setAudioDataList(audioDataListParam:AudioData[]){
 .voice-chat-area{
     display: flex;
     flex-direction: column;
+    width: 100%;
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :class="{'div-1':responsiveType==='desktop','div-2':responsiveType==='mobile'}">
     <Header v-if="responsiveType==='desktop'" />
     <HeaderSp v-else-if="responsiveType==='mobile'" />
     <router-view />
@@ -7,19 +7,22 @@
 </template>
 
 <script lang="ts" setup>
-import { resize } from './utils/htmlElementUtils';
 import Header from './views/Header.vue'
 import HeaderSp from './views/HeaderSp.vue'
-import { onMounted, ref, watch } from 'vue';
-const windowsWidth=ref(window.innerWidth)
+import { onBeforeMount, onMounted, onUnmounted, ref, watch } from 'vue';
+const windowsWidth=ref(0)
 const responsiveType=ref<'desktop'|'mobile'>('desktop')
 
 onMounted(()=>{
+  windowsWidth.value=window.innerWidth
   window.addEventListener('resize', ()=>windowsWidth.value=window.innerWidth);
 })
 
+onUnmounted(()=>{
+  window.removeEventListener('resize', ()=>windowsWidth.value=window.innerWidth);
+})
+
 watch(windowsWidth,()=>{
-  console.log("検知しました。")
   if(windowsWidth.value>=768){
     responsiveType.value='desktop'
   }else{
@@ -30,7 +33,17 @@ watch(windowsWidth,()=>{
 
 </script>
 
-<style>
+<style scoped>
+.div-1{
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+}
+
+.div-2{
+  display: flex;
+  flex-direction: column;
+}
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;

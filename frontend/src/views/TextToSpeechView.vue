@@ -15,5 +15,6 @@ import TextInpuArea from "@/components/TextToSpeech/TextInpuArea.vue";
 .text-to-speech{
     display: flex;
     flex-direction: column;
+    width: 100%;
 }
 </style>
