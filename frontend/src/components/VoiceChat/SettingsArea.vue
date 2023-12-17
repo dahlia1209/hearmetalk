@@ -14,24 +14,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
-import { Settings } from "@/models/VoiceChat"
-
-export interface Props {
-    settings: Settings
-};
-
-const props=withDefaults(defineProps<Props>(), {
-    settings: ()=>new Settings()
-})
-
-// const isSpeechEnabled=ref(props.settings.isSpeechEnabled)
-const settings=ref(props.settings)
-const emit = defineEmits(['settingsUpadated'])
-
-watch(settings,()=>{
-    emit('settingsUpadated',settings.value)
-})
+import { settings } from '@/store/voiceChatState'
 
 </script>
 

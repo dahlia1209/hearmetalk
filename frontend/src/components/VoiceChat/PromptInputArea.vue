@@ -36,18 +36,8 @@ import { getFormattedDate } from "@/utils/dateUtils";
 import { AudioData, MimeTypeMapper } from "@/models/SpeechToText"
 import { Speaker } from "@/models/TextToSpeech"
 import { submitText } from "@/services/textToSpeechServices";
-import { Settings } from "@/models/VoiceChat"
+import { settings } from '@/store/voiceChatState'
 
-export interface Props {
-    settings: Settings
-};
-
-const props = withDefaults(defineProps<Props>(), {
-    settings: () => new Settings()
-})
-
-// const isSpeechEnabled = ref(props.settings)
-const settings = ref(props.settings)
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
 const isWaitingForSubmit = ref(true)
 const recordingState = ref<"recording" | "stop" | "pending">("stop");
@@ -63,11 +53,6 @@ const errorMessage = ref("")
 const selectedSpeaker = ref<Speaker>(Speaker.getSpeaker('Nanami'))
 const audioData = ref<AudioData>(new AudioData())
 const audioPlayerRef = ref<HTMLAudioElement | null>(null)
-
-watch(props, () => {
-    settings.value = props.settings
-})
-
 
 async function handleSubmitButton(textareaInput: string) {
     if (textareaInput === "") {
@@ -120,6 +105,11 @@ async function handleSubmitButton(textareaInput: string) {
         for await (const chunk of submitChatStream(chatCompletionSettings)) {
             messages.value[messages.value.length - 1].content += chunk;
         }
+
+        if (settings.value.isSpeechEnabled) {
+            console.log("handleSubmitText");
+            handleSubmitTextToSpeech(messages.value[messages.value.length - 1].content);
+        }
     }
     
     async function handleSingleMessage(chatCompletionSettings:ChatCompletionSettings) {
@@ -143,7 +133,7 @@ async function startRecording(): Promise<void> {
         audioChunks.value.push(event.data);
     };
     mediaRecorder.value.start();
-    
+
 };
 
 async function stopRecording(): Promise<AudioData | null> {
@@ -276,6 +266,7 @@ async function handleStartRecording() {
     resize: none;
     box-sizing: border-box;
     border: 0 #fff;
+    font-size: 16px;
 }
 
 .textarea-1:focus {
