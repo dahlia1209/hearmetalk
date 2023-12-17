@@ -27,7 +27,6 @@ import { onMounted, ref } from 'vue';
 import { Speaker } from "@/models/TextToSpeech"
 import { AudioData, MimeTypeMapper, AudioDataDto } from "@/models/SpeechToText"
 import { submitText } from "@/services/textToSpeechServices";
-import azure_mp3 from "@/assets/92fbe433-8f55-4956-869d-6144c1a4e9dc.mp3"
 
 const currentInputLength = ref(0)
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
