@@ -1,7 +1,11 @@
 <template>
     <div class="prompt-input-area">
-        <div v-for="message in messages" :key="message.messageId">
-            {{ message.roleDisplay }}：{{ message.content }}
+        <div class="div-4" v-for="message in messages" :key="message.messageId">
+            <img class="img-1" src="@/assets/chatIcon.svg">
+            <div class="div-2">
+                <div class="div-3">{{ message.roleDisplay }}</div>
+                <div class="div-5">{{ message.content }}</div>
+            </div>
         </div>
         <audio ref="audioPlayerRef"></audio>
         <div class="div-2">
@@ -26,22 +30,24 @@
 import { resize } from "@/utils/htmlElementUtils"
 import { onMounted, ref, watch, } from 'vue';
 import { Message, ChatCompletionSettings, MessageDto } from "@/models/Chat"
-import { submitChat } from "@/services/chatServices"
+import { submitChat, submitChatStream } from "@/services/chatServices"
 import { submitAudio } from "@/services/speechToTextServices";
 import { getFormattedDate } from "@/utils/dateUtils";
 import { AudioData, MimeTypeMapper } from "@/models/SpeechToText"
 import { Speaker } from "@/models/TextToSpeech"
 import { submitText } from "@/services/textToSpeechServices";
+import { Settings } from "@/models/VoiceChat"
 
 export interface Props {
-    settings: boolean
+    settings: Settings
 };
 
 const props = withDefaults(defineProps<Props>(), {
-    settings: true
+    settings: () => new Settings()
 })
 
-const isSpeechEnabled = ref(props.settings)
+// const isSpeechEnabled = ref(props.settings)
+const settings = ref(props.settings)
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
 const isWaitingForSubmit = ref(true)
 const recordingState = ref<"recording" | "stop" | "pending">("stop");
@@ -58,39 +64,72 @@ const selectedSpeaker = ref<Speaker>(Speaker.getSpeaker('Nanami'))
 const audioData = ref<AudioData>(new AudioData())
 const audioPlayerRef = ref<HTMLAudioElement | null>(null)
 
-watch(props,()=>{
-    isSpeechEnabled.value=props.settings
+watch(props, () => {
+    settings.value = props.settings
 })
 
 
 async function handleSubmitButton(textareaInput: string) {
     if (textareaInput === "") {
         console.error('メッセージを入力してください');
-        return
-    } else {
-        try {
-            isWaitingForSubmit.value = false
-            const message = new Message()
-            message.content = textareaInput
-            message.role = "user"
-            message.roleDisplay = "あなた"
-            messages.value.push(message)
-            const messageDtos = systemmessage.value.content == "" ?
-                [...messages.value.map(message => message.toDto())] :
-                [systemmessage.value.toDto(), ...messages.value.map(message => message.toDto())]
-            const chatCompletionSettings = new ChatCompletionSettings("gpt-4", messageDtos);
+        return;
+    }
 
-            const response = await submitChat(chatCompletionSettings);
-            response.roleDisplay = "ChatAI"
-            messages.value.push(response)
-            if (isSpeechEnabled.value) {
-                console.log("handleSubmitText")
-                handleSubmitText(response.content)
-            }
-            isWaitingForSubmit.value = true
-        } catch (error) {
-            console.error('Submit Error:', error);
-            isWaitingForSubmit.value = true
+    try {
+        isWaitingForSubmit.value = false;
+
+        addMessageToChat(textareaInput, "user", "あなた");
+        const messageDtos = createMessageDtos();
+
+        const chatCompletionSettings = createChatCompletionSettings(messageDtos);
+
+        if (settings.value.stream) {
+            await handleStream(chatCompletionSettings);
+        } else {
+            await handleSingleMessage(chatCompletionSettings);
+        }
+    } catch (error) {
+        console.error('Submit Error:', error);
+    } finally {
+        isWaitingForSubmit.value = true;
+    }
+
+    function addMessageToChat(content: string, role: "user" | "assistant" | "system", roleDisplay: string) {
+        const message = new Message();
+        message.content = content;
+        message.role = role;
+        message.roleDisplay = roleDisplay;
+        messages.value.push(message);
+    }
+    
+    function createMessageDtos() {
+        return systemmessage.value.content == "" ?
+            [...messages.value.map(message => message.toDto())] :
+            [systemmessage.value.toDto(), ...messages.value.map(message => message.toDto())];
+    }
+    
+    function createChatCompletionSettings(messageDtos:MessageDto[]) {
+        const chatCompletionSettings = new ChatCompletionSettings("gpt-4", messageDtos);
+        chatCompletionSettings.stream = settings.value.stream;
+        return chatCompletionSettings;
+    }
+    
+    async function handleStream(chatCompletionSettings:ChatCompletionSettings) {
+        addMessageToChat("", "assistant", "ChatAI");
+    
+        for await (const chunk of submitChatStream(chatCompletionSettings)) {
+            messages.value[messages.value.length - 1].content += chunk;
+        }
+    }
+    
+    async function handleSingleMessage(chatCompletionSettings:ChatCompletionSettings) {
+        const response = await submitChat(chatCompletionSettings);
+        response.roleDisplay = "ChatAI";
+        messages.value.push(response);
+    
+        if (settings.value.isSpeechEnabled) {
+            console.log("handleSubmitText");
+            handleSubmitTextToSpeech(response.content);
         }
     }
 }
@@ -104,6 +143,7 @@ async function startRecording(): Promise<void> {
         audioChunks.value.push(event.data);
     };
     mediaRecorder.value.start();
+    
 };
 
 async function stopRecording(): Promise<AudioData | null> {
@@ -153,7 +193,7 @@ async function handleStopRecording() {
     }
 }
 
-async function handleSubmitText(text: string) {
+async function handleSubmitTextToSpeech(text: string) {
     errorMessage.value = ""
     const supportedTypes = Object.keys(MimeTypeMapper.mapping).filter(mimeType => MediaRecorder.isTypeSupported(mimeType));
     if (selectedSpeaker.value && text && supportedTypes.length > 0 && audioPlayerRef.value) {
@@ -202,6 +242,31 @@ async function handleStartRecording() {
     display: flex;
     border-radius: 8px;
     border: 1px solid #C5C5D2;
+}
+
+.div-2 {
+    display: flex;
+    flex-direction: column;
+}
+
+.div-3 {
+    text-align: left;
+    font-weight: 600;
+
+}
+
+.div-5 {
+    text-align: left;
+}
+
+.div-4{
+    display: flex;
+    flex-direction: row;
+    padding: 16px 8px;
+}
+
+.img-1{
+    align-self: self-start;
 }
 
 .textarea-1 {

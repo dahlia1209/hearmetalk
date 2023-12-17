@@ -1,29 +1,36 @@
 <template>
     <div class="settings-area">
         <label class="label-1">
-            <input type="checkbox" hidden v-model="isSpeechEnabled" />
+            <input type="checkbox" hidden v-model="settings.isSpeechEnabled" />
             <span class="span-1"></span>
             音声読み上げ
         </label>
-
+        <label class="label-1">
+            <input type="checkbox" hidden v-model="settings.stream" />
+            <span class="span-1"></span>
+            ストリーミング
+        </label>
     </div>
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
+import { Settings } from "@/models/VoiceChat"
 
 export interface Props {
-    isSpeechEnabled: boolean
+    settings: Settings
 };
 
 const props=withDefaults(defineProps<Props>(), {
-    isSpeechEnabled: true
+    settings: ()=>new Settings()
 })
-const isSpeechEnabled=ref(props.isSpeechEnabled)
+
+// const isSpeechEnabled=ref(props.settings.isSpeechEnabled)
+const settings=ref(props.settings)
 const emit = defineEmits(['settingsUpadated'])
 
-watch(isSpeechEnabled,()=>{
-    emit('settingsUpadated',isSpeechEnabled.value)
+watch(settings,()=>{
+    emit('settingsUpadated',settings.value)
 })
 
 </script>

@@ -20,6 +20,7 @@ class ChatCompletionSettings(BaseModel):
     top_p: float = 1.0
     frequency_penalty: float = 0.0
     presence_penalty: float = 0.0
+    stream: bool=False
 
 class MessageResponseDto(BaseModel):
     content: str = ""
@@ -44,5 +45,22 @@ class ChatCompletionResponse(BaseModel):
     model: str
     object: Literal["chat.completion"]
     usage: Usage
+    system_fingerprint: Optional[str] = None
+
+class MessageStream(BaseModel):
+    role: Optional[Literal["system", "user", "assistant"]] = None
+    content: Optional[str] = None
+
+class ChoiceStream(BaseModel):
+    delta: MessageStream
+    index: int
+    finish_reason: Literal["stop", "max_tokens", "timeout",None,"length"]
+class ChatCompletionStreamResponse(BaseModel):
+    choices: List[ChoiceStream]
+    created: int
+    id: str
+    model: str
+    object: Literal["chat.completion.chunk"]
+    usage: Optional[Usage]=None
     system_fingerprint: Optional[str] = None
 
