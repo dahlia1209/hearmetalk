@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { Message, ChatCompletionSettings } from "@/models/Chat"
+import { ServerEvents } from "@/models/AITalk"
 
 export const submitChat = async (chatCompletionSettings: ChatCompletionSettings): Promise<Message> => {
     try {
@@ -43,6 +44,15 @@ export async function* submitChatStream(chatCompletionSettings: ChatCompletionSe
         } else {
             console.error('Response body is null');
         }
+    } catch (error) {
+        console.error('Error:', error);
+        throw error;
+    }
+}
+
+export async function submitChatStreamMessage(socket:any,chatCompletionSettings: ChatCompletionSettings): Promise<void> {
+    try {
+        socket.emit(ServerEvents.PROMPT_MESSAGE, chatCompletionSettings);
     } catch (error) {
         console.error('Error:', error);
         throw error;

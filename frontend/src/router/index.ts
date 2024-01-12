@@ -4,6 +4,7 @@ import Chat from '@/views/Chat.vue';
 import VoiceChat from '@/views/VoiceChatView.vue'; 
 import Speech_to_Text from '@/views/SpeechToText.vue'; 
 import Text_to_Speech from '@/views/TextToSpeechView.vue'; 
+import AI_Talk from '@/views/AITalkViews.vue'; 
 
 const routes = [
   {
@@ -30,6 +31,11 @@ const routes = [
     path: '/voice-chat',
     name: 'VoiceChat',
     component: VoiceChat  
+  },
+  {
+    path: '/ai-talk',
+    name: 'AITalk',
+    component: AI_Talk  
   },
 ]
 
