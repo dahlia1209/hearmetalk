@@ -6,7 +6,7 @@ from pydub import AudioSegment
 import queue,base64
 from io import BytesIO
 import app
-from __main__ import socketio
+
 
 def initialize_azure_speech_client(speech_recognition_language='ja-JP',speech_synthesis_voice_name='ja-JP-NanamiNeural'):
     """Azureの音声クライアントを初期化します。"""
