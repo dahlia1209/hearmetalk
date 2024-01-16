@@ -50,9 +50,18 @@ export async function* submitChatStream(chatCompletionSettings: ChatCompletionSe
     }
 }
 
-export async function submitChatStreamMessage(socket:any,chatCompletionSettings: ChatCompletionSettings): Promise<void> {
+// export async function submitChatStreamMessage(socket:any,chatCompletionSettings: ChatCompletionSettings): Promise<void> {
+//     try {
+//         socket.emit(ServerEvents.PROMPT_MESSAGE, chatCompletionSettings);
+//     } catch (error) {
+//         console.error('Error:', error);
+//         throw error;
+//     }
+// }
+
+export async function submitChatStreamMessage(ws:WebSocket,chatCompletionSettings: ChatCompletionSettings): Promise<void> {
     try {
-        socket.emit(ServerEvents.PROMPT_MESSAGE, chatCompletionSettings);
+        ws.send(JSON.stringify(chatCompletionSettings));
     } catch (error) {
         console.error('Error:', error);
         throw error;

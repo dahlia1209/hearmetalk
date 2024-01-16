@@ -11,18 +11,18 @@
 import PromptInputArea from "@/components/AITalk/PromptInputArea.vue";
 import SettingsArea from "@/components/AITalk/SettingsArea.vue";
 import { onBeforeUnmount, onMounted, ref ,watch} from 'vue';
-import { state,socket } from "@/socket";
+// import { state,socket } from "@/socket";
 
 
 
-onBeforeUnmount(() => {
-    console.log("socket.disconnect")
-    socket.disconnect();
-})
-onMounted(() => {
-    console.log("socket.connect")
-    socket.connect()
-})
+// onBeforeUnmount(() => {
+//     console.log("socket.disconnect")
+//     socket.disconnect();
+// })
+// onMounted(() => {
+//     console.log("socket.connect")
+//     socket.connect()
+// })
 
 // function sendMessage() {
 //     console.log("sendMessage")

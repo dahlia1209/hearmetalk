@@ -22,9 +22,11 @@
                 @input="textareaRef === null ? null : resize(textareaRef)" ref="textareaRef"
                 v-model="textareaInput"></textarea>
             <button class="button-1" :disabled="!isWaitingForSubmit || !recordingState"
-                @click="handleSubmitButton(textareaInput)"><img src="@/assets/submit.svg"></button>
+                @click="handleSubmitButton(textareaInput);textareaInput=''"><img src="@/assets/submit.svg"></button>
         </div>
-        <button @click="socket.emit('message', 'test');">send message</button>
+        <button @click="handleSendMessage">send message</button>
+        <!-- <button @click="socket.emit('speech_recognition_with_push_stream');">speech_recognition_with_push_stream</button>
+         -->
     </div>
 </template>
 <script setup lang="ts">
@@ -32,14 +34,14 @@ import { resize } from "@/utils/htmlElementUtils"
 import { onMounted, ref, watch, watchEffect } from 'vue';
 import { Message, ChatCompletionSettings, MessageDto } from "@/models/Chat"
 import { submitChat, submitChatStream, submitChatStreamMessage } from "@/services/chatServices"
-import { submitAudio, submitAudioStreamEmit, startRecognitionEmit,stopRecognitionEmit } from "@/services/speechToTextServices";
+import { submitAudio, submitAudioStreamEmit, startRecognitionEmit, stopRecognitionEmit } from "@/services/speechToTextServices";
 import { getFormattedDate } from "@/utils/dateUtils";
 import { AudioData, MimeTypeMapper } from "@/models/SpeechToText"
 import { Speaker } from "@/models/TextToSpeech"
 import { submitText } from "@/services/textToSpeechServices";
 import { settings } from '@/store/aiChatState'
 import { ClientEvents } from "@/models/AITalk";
-import { state, socket } from "@/socket";
+// import { state, socket } from "@/socket";
 
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
 const isWaitingForSubmit = ref(true)
@@ -57,39 +59,65 @@ const selectedSpeaker = ref<Speaker>(Speaker.getSpeaker('Nanami'))
 const audioData = ref<AudioData>(new AudioData())
 const audioPlayerRef = ref<HTMLAudioElement | null>(null)
 const targetMessage = ref<Message | null>(null)
-const chunkCount =ref()
+const chunkCount = ref()
+const ws = ref<WebSocket | null>(null)
+
+onMounted(() => {
+    ws.value = new WebSocket('ws://localhost:8000/chat');
+    ws.value.onmessage = (event) => {
+        // console.log(event.data);
+        if (targetMessage.value != null) {
+            targetMessage.value.content += event.data
+        }
+
+    };
+
+    ws.value.onerror = (event) => {
+        console.error('WebSocket error:', event);
+    };
+
+    ws.value.onerror = (event) => {
+        console.log('WebSocket connection closed:', event);
+    };
+})
 
 //OpenAI APIのレスポンス結果をウォッチし、画面に表示させる
-watch(
-    () => state.responseMessages.length,
-    (length) => {
-        if (targetMessage.value && length > 0) {
-            const latestMessage = state.responseMessages[state.responseMessages.length - 1];
-            targetMessage.value.content += latestMessage;
-        }
-    }
-)
+// watch(
+//     () => state.responseMessages.length,
+//     (length) => {
+//         if (targetMessage.value && length > 0) {
+//             const latestMessage = state.responseMessages[state.responseMessages.length - 1];
+//             targetMessage.value.content += latestMessage;
+//         }
+//     }
+// )
 
-watch(
-    () => state.reconizedMessages.length,
-    (length) => {
-        if (length > 0) {
-            const latestMessage = state.reconizedMessages[state.responseMessages.length - 1];
-            textareaInput.value += latestMessage;
-        }
-    }
-)
+// watch(
+//     () => state.reconizedMessages.length,
+//     (length) => {
+//         if (length > 0) {
+//             const latestMessage = state.reconizedMessages[state.responseMessages.length - 1];
+//             textareaInput.value += latestMessage;
+//         }
+//     }
+// )
 
-watch(() => state.isRecognitionReady,
-            (isRecognitionReady) => {
-                if (isRecognitionReady &&mediaRecorder.value) {
-                    const fileFormat=(MimeTypeMapper.getExtension(supportedTypes.value[0]) ?? "").replace(/\./g, "")
-                    console.log("録音を開始します。")
-                    mediaRecorder.value.start(1000);
-                    console.log("録音データのMIMEタイプ:", mediaRecorder.value.mimeType);
-                    console.log("録音データのfileFormat:", fileFormat);
-                }
-            })
+// watch(() => state.isRecognitionReady,
+//             (isRecognitionReady) => {
+//                 if (isRecognitionReady &&mediaRecorder.value) {
+//                     const fileFormat=(MimeTypeMapper.getExtension(supportedTypes.value[0]) ?? "").replace(/\./g, "")
+//                     console.log("録音を開始します。")
+//                     mediaRecorder.value.start(1000);
+//                     console.log("録音データのMIMEタイプ:", mediaRecorder.value.mimeType);
+//                     console.log("録音データのfileFormat:", fileFormat);
+//                 }
+//             })
+
+function handleSendMessage() {
+    if (ws.value != null) {
+        ws.value.send('こんにちは')
+    }
+}
 
 async function handleSubmitButton(textareaInput: string) {
     if (textareaInput === "") {
@@ -101,6 +129,7 @@ async function handleSubmitButton(textareaInput: string) {
         isWaitingForSubmit.value = false;
 
         addMessageToChat(textareaInput, "user", "あなた");
+        
         const messageDtos = createMessageDtos();
 
         const chatCompletionSettings = createChatCompletionSettings(messageDtos);
@@ -141,16 +170,16 @@ async function handleSubmitButton(textareaInput: string) {
         const message = addMessageToChat("", "assistant", "ChatAI");
         targetMessage.value = message
 
-        state.initResponseMessages();
-        await submitChatStreamMessage(socket, chatCompletionSettings)
-        // for await (const chunk of submitChatStream(chatCompletionSettings)) {
-        //     messages.value[messages.value.length - 1].content += chunk;
-        // }
-
-        if (settings.value.isSpeechEnabled) {
-            console.log("handleSubmitText");
-            handleSubmitTextToSpeech(messages.value[messages.value.length - 1].content);
+        // state.initResponseMessages();
+        if (ws.value !== null) {
+            await submitChatStreamMessage(ws.value, chatCompletionSettings)
         }
+        
+
+        // if (settings.value.isSpeechEnabled) {
+        //     console.log("handleSubmitText");
+        //     handleSubmitTextToSpeech(messages.value[messages.value.length - 1].content);
+        // }
     }
 
     async function handleSingleMessage(chatCompletionSettings: ChatCompletionSettings) {
@@ -232,53 +261,42 @@ async function handleSubmitTextToSpeech(text: string) {
 }
 
 async function handleStartRecording() {
-    recordingState.value = "pending";
-    await startRecording();
-    recordingState.value = "recording";
+    // recordingState.value = "pending";
+    // await startRecording();
+    // recordingState.value = "recording";
 
-    async function startRecording(): Promise<void> {
-        audioChunks.value = [];
-        chunkCount.value=0
-        const timeslice=1000
-        supportedTypes.value = Object.keys(MimeTypeMapper.mapping).filter(mimeType => MediaRecorder.isTypeSupported(mimeType));
-        const fileFormat=(MimeTypeMapper.getExtension(supportedTypes.value[0]) ?? "").replace(/\./g, "")
-        stream.value = await navigator.mediaDevices.getUserMedia({ audio: true })
-        mediaRecorder.value = new MediaRecorder(stream.value,{mimeType: supportedTypes.value[0]})
-        mediaRecorder.value.ondataavailable = async (event) => {
-            const arrayBuffer = await event.data.arrayBuffer();
-            chunkCount.value+=1
-            await submitAudioStreamEmit(socket, arrayBuffer,chunkCount.value,timeslice)
-            // await submitAudioStreamEmit(socket, event.data)
-        };
-        startRecognitionEmit(socket,fileFormat);
-        // watch(() => state.isRecognitionReady,
-        //     (isRecognitionReady) => {
-        //         if (isRecognitionReady &&mediaRecorder.value) {
-        //             console.log("録音を開始します。")
-        //             mediaRecorder.value.start(timeslice);
-        //             console.log("録音データのMIMEタイプ:", mediaRecorder.value.mimeType);
-        //             console.log("録音データのfileFormat:", fileFormat);
-        //         }
-        //     })
-        // mediaRecorder.value.start(1000);
-
-    };
+    // async function startRecording(): Promise<void> {
+    //     audioChunks.value = [];
+    //     chunkCount.value=0
+    //     const timeslice=1000
+    //     supportedTypes.value = Object.keys(MimeTypeMapper.mapping).filter(mimeType => MediaRecorder.isTypeSupported(mimeType));
+    //     const fileFormat=(MimeTypeMapper.getExtension(supportedTypes.value[0]) ?? "").replace(/\./g, "")
+    //     stream.value = await navigator.mediaDevices.getUserMedia({ audio: true })
+    //     mediaRecorder.value = new MediaRecorder(stream.value,{mimeType: supportedTypes.value[0]})
+    //     mediaRecorder.value.ondataavailable = async (event) => {
+    //         const arrayBuffer = await event.data.arrayBuffer();
+    //         chunkCount.value+=1
+    //         await submitAudioStreamEmit(socket, arrayBuffer,chunkCount.value,timeslice)
+    //         // await submitAudioStreamEmit(socket, event.data)
+    //     };
+    //     startRecognitionEmit(socket,fileFormat);
+    // };
 }
 
 async function handleStopRecording() {
-    try {
-        recordingState.value = "pending";
-        stopRecognitionEmit(socket)
-        const result = await stopRecording();
-        if (result !== null) {
-            // emit('audioDataUploaded', uploadedAudioData.value);
-            handleSubmitButton(result.text)
-        }
-        recordingState.value = "stop";
-    } catch (error) {
-        console.error("録音の停止中にエラーが発生しました", error);
-        recordingState.value = "stop";
-    }
+    // try {
+    //     recordingState.value = "pending";
+    //     stopRecognitionEmit(socket)
+    //     const result = await stopRecording();
+    //     if (result !== null) {
+    //         // emit('audioDataUploaded', uploadedAudioData.value);
+    //         handleSubmitButton(result.text)
+    //     }
+    //     recordingState.value = "stop";
+    // } catch (error) {
+    //     console.error("録音の停止中にエラーが発生しました", error);
+    //     recordingState.value = "stop";
+    // }
 }
 
 </script>

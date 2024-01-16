@@ -18,6 +18,7 @@ from pydub import AudioSegment
 from werkzeug.datastructures import FileStorage
 from io import BytesIO
 import azure.cognitiveservices.speech as speechsdk
+import wave
 
 #debug
 connected_users = []
@@ -26,7 +27,7 @@ connected_users = []
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 CORS(app)
-socketio = SocketIO(app, cors_allowed_origins="*", logger=True, engineio_logger=True)
+socketio = SocketIO(app, cors_allowed_origins="*", logger=True, engineio_logger=True,message_queue='redis://127.0.0.1:6379')
 
 # ログの設定
 logging.basicConfig(level=logging.INFO)
@@ -63,30 +64,6 @@ def handle_message(data):
     # thread.join()
     # test_func()
     # background_thread()
-
-def test_func():
-    def thread_func():
-        print('thread_func waiting for 2 sec')
-        socketio.emit('message','thread_func')
-        time.sleep(2)
-        print('thread_func done')
-    
-    thread=threading.Thread(target=thread_func)
-    socketio.emit('message','test_func')
-    thread.start()
-    thread.join()
-
-def background_thread():
-    """ 1秒ごとにクライアントにメッセージを送信するバックグラウンドスレッド """
-    count = 0
-    while True:
-        time.sleep(1)  # 1秒待機
-        count += 1
-        # print({'data': f'Message {count}'})
-        print('connected_users:',connected_users)
-        socketio.emit('message', f'Message {count}')
-        socketio.sleep(0)
-        # test_func()
 
 @socketio.on(ServerEvents.PROMPT_MESSAGE)
 def handle_message(data):
@@ -165,49 +142,66 @@ def handle_stop_recognition():
 
 
 
-def push_stream_writer(stream, audio_queue,format,temp_file):
-    END_OF_STREAM_MARKER = None
+# def push_stream_writer(stream, audio_queue,format,temp_file):
+#     END_OF_STREAM_MARKER = None
 
-    def write(stream:speechsdk.audio.PushAudioInputStream,audio_data:bytes):
+#     def write(stream:speechsdk.audio.PushAudioInputStream,audio_data:bytes):
 
-        temp_file.write(audio_data)
-        byte_stream = BytesIO()
-        audio_segment = AudioSegment.from_file(temp_file.name, format=format).set_frame_rate(16000).set_channels(1).set_sample_width(2)
-        start_time = (chunk_count-1)*time_slice  # 開始時間（ミリ秒単位）
-        end_time = chunk_count*time_slice    # 終了時間（ミリ秒単位）
-        extract_audio_segment = audio_segment[start_time:end_time]
-        extract_audio_segment.export(byte_stream, format="wav")
-        audio_bytes = byte_stream.getvalue()
-        stream.write(audio_bytes)
+#         temp_file.write(audio_data)
+#         byte_stream = BytesIO()
+#         audio_segment = AudioSegment.from_file(temp_file.name, format=format).set_frame_rate(16000).set_channels(1).set_sample_width(2)
+#         start_time = (chunk_count-1)*time_slice  # 開始時間（ミリ秒単位）
+#         end_time = chunk_count*time_slice    # 終了時間（ミリ秒単位）
+#         extract_audio_segment = audio_segment[start_time:end_time]
+#         extract_audio_segment.export(byte_stream, format="wav")
+#         audio_bytes = byte_stream.getvalue()
+#         stream.write(audio_bytes)
 
-    while True:
-        try:
-            audio_data,chunk_count,time_slice = audio_queue.get()
+#     while True:
+#         try:
+#             audio_data,chunk_count,time_slice = audio_queue.get()
 
-            # 終了マーカーを受け取ったらループを終了
-            if audio_data is END_OF_STREAM_MARKER:
-                temp_file.close()
+#             # 終了マーカーを受け取ったらループを終了
+#             if audio_data is END_OF_STREAM_MARKER:
+#                 temp_file.close()
                 
-                #デバッグ用エクスポート
-                audio_segment = AudioSegment.from_file(temp_file.name, format=format).set_frame_rate(16000).set_channels(1).set_sample_width(2)
-                start_time = (chunk_count-1)*time_slice  # 開始時間（ミリ秒単位）
-                end_time = chunk_count*time_slice    # 終了時間（ミリ秒単位）
-                extract_audio_segment = audio_segment[start_time:end_time]
-                extract_audio_segment.export("received_audio.wav", format="wav")
-                # audio_segment.export("received_audio.wav", format="wav")
+#                 #デバッグ用エクスポート
+#                 audio_segment = AudioSegment.from_file(temp_file.name, format=format).set_frame_rate(16000).set_channels(1).set_sample_width(2)
+#                 start_time = (chunk_count-1)*time_slice  # 開始時間（ミリ秒単位）
+#                 end_time = chunk_count*time_slice    # 終了時間（ミリ秒単位）
+#                 extract_audio_segment = audio_segment[start_time:end_time]
+#                 extract_audio_segment.export("received_audio.wav", format="wav")
+#                 # audio_segment.export("received_audio.wav", format="wav")
 
-                os.remove(temp_file.name)
-                break
+#                 os.remove(temp_file.name)
+#                 break
 
-            # ストリームにデータを書き込む
-            write(stream,audio_data)
+#             # ストリームにデータを書き込む
+#             write(stream,audio_data)
 
-        except Exception as e:
-            # エラーハンドリング
-            print(f"エラー発生: {e}")
-            break
+#         except Exception as e:
+#             # エラーハンドリング
+#             print(f"エラー発生: {e}")
+#             break
         
-    stream.close()
+#     stream.close()
+
+def push_stream_writer(stream):
+    # The number of bytes to push per buffer
+    n_bytes = 3200
+    wav_fh = wave.open(r'C:\src\hearmetalk\backend-websocket\南八幡1丁目-2.wav')
+    # Start pushing data until all data has been read from the file
+    try:
+        while True:
+            frames = wav_fh.readframes(n_bytes // 2)
+            # print('read {} bytes'.format(len(frames)))
+            if not frames:
+                break
+            stream.write(frames)
+            time.sleep(.1)
+    finally:
+        wav_fh.close()
+        stream.close()  # must be done to signal the end of stream
     
 def initialize_azure_speech_client(speech_recognition_language='ja-JP',speech_synthesis_voice_name='ja-JP-NanamiNeural'):
     """Azureの音声クライアントを初期化します。"""
@@ -271,6 +265,52 @@ def stop_speech_recognition(speech_recognizer:speechsdk.SpeechRecognizer,push_st
     speech_recognizer.stop_continuous_recognition()
     push_stream_writer_thread.join()
     print('stop_speech_recognition done')
+
+@socketio.on('speech_recognition_with_push_stream')
+def speech_recognition_with_push_stream():
+    """gives an example how to use a push audio stream to recognize speech from a custom audio
+    source"""
+    speech_config = initialize_azure_speech_client()
+
+    # Setup the audio stream
+    stream = speechsdk.audio.PushAudioInputStream()
+    audio_config = speechsdk.audio.AudioConfig(stream=stream)
+
+    # Instantiate the speech recognizer with push stream input
+    speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
+    recognition_done = threading.Event()
+
+    # Connect callbacks to the events fired by the speech recognizer
+    def session_stopped_cb(evt):
+        """callback that signals to stop continuous recognition upon receiving an event `evt`"""
+        print('SESSION STOPPED: {}'.format(evt))
+        recognition_done.set()
+    
+    def session_recognized_cb(evt):
+        print('RECOGNIZED: {}'.format(evt))
+        reconized_message_emit('session_recognized_cbからの呼び出し')
+
+    reconized_message_emit('speech_recognition_with_push_streamを呼び出しました')
+    speech_recognizer.recognizing.connect(lambda evt: print('RECOGNIZING: {}'.format(evt)))
+    # speech_recognizer.recognized.connect(lambda evt: print('RECOGNIZED: {}'.format(evt)))
+    speech_recognizer.recognized.connect(session_recognized_cb)
+    speech_recognizer.session_started.connect(lambda evt: print('SESSION STARTED: {}'.format(evt)))
+    speech_recognizer.session_stopped.connect(session_stopped_cb)
+    speech_recognizer.canceled.connect(lambda evt: print('CANCELED {}'.format(evt)))
+
+    # Start push stream writer thread
+    push_stream_writer_thread = threading.Thread(target=push_stream_writer, args=[stream])
+    push_stream_writer_thread.start()
+
+    # Start continuous speech recognition
+    speech_recognizer.start_continuous_recognition()
+
+    # Wait until all input processed
+    recognition_done.wait()
+
+    # Stop recognition and clean up
+    speech_recognizer.stop_continuous_recognition()
+    push_stream_writer_thread.join()
 
 if __name__ == '__main__':
     # threading.Thread(target=background_thread, daemon=True).start()
