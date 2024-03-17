@@ -34,6 +34,8 @@ jobs:
           ###### End of Repository/Build Configurations ######
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_SPEECH_TO_TEXT_CONTAINER_URL: ${{ secrets.VITE_SPEECH_TO_TEXT_CONTAINER_URL }}
+          VITE_TEXT_TO_SPEECH_CONTAINER_URL: ${{ secrets.VITE_TEXT_TO_SPEECH_CONTAINER_URL }}
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
