@@ -10,10 +10,10 @@
         <audio ref="audioPlayerRef"></audio>
         <div class="div-2">
             <button type="button" class="button-1" :disabled="!isWaitingForSubmit || recordingState !== 'stop'"
-                v-if="recordingState === 'stop'" @click="handleStartRecording()"><img src="@/assets/MicIcon.svg"
+                v-if="recordingState === 'stop'" @click="handleStartRecording()"><img class="img-1" src="@/assets/MicIcon.svg"
                     alt="MicIcon"></button>
-            <img src="@/assets/spinner.svg" class="img-2" v-else-if="recordingState === 'pending'">
-            <img src="@/assets/StopIcon.svg" class="img-2" @click="handleStopRecording()"
+            <img src="@/assets/spinner.svg" class="img-1" v-else-if="recordingState === 'pending'">
+            <img src="@/assets/StopIcon.svg" class="img-1" @click="handleStopRecording()"
                 v-else-if="recordingState === 'recording'" />
         </div>
         または
@@ -257,6 +257,8 @@ async function handleStartRecording() {
 
 .img-1{
     align-self: self-start;
+    width: 40px;
+    height: 40px;
 }
 
 .textarea-1 {

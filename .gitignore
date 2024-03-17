@@ -45,3 +45,6 @@ venv/
 
 # secret
 secret.json
+
+# 整理中
+kubernetes/

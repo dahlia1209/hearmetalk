@@ -28,3 +28,30 @@ export const submitAudio = async (audioData: AudioData): Promise<AudioDataDto> =
         throw error;
     }
 }
+
+export const submitAudioStreamEmit = async (socket:any,arrayBuffer: ArrayBuffer,chunkCount:number,timeslice:number): Promise<void> => {
+    try {
+        socket.emit('recording_audio', arrayBuffer,chunkCount,timeslice);
+    } catch (error) {
+        console.error('Submit Error:', error);
+        throw error;
+    }
+}
+
+export const startRecognitionEmit = (socket:any,fileFormat:string)=>{
+    try {
+        socket.emit('start_recognition',fileFormat);
+    } catch (error) {
+        console.error('Submit Error:', error);
+        throw error;
+    }
+}
+
+export const stopRecognitionEmit = (socket:any)=>{
+    try {
+        socket.emit('stop_recognition');
+    } catch (error) {
+        console.error('Submit Error:', error);
+        throw error;
+    }
+}
