@@ -8,7 +8,6 @@ interface State {
     responseMessages: string[],
     reconizedMessages: string[],
     isRecognitionReady:boolean
-
     initResponseMessages():void
 }
 

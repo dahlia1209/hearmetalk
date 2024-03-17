@@ -10,6 +10,39 @@
             <span class="span-1"></span>
             ストリーミング
         </label>
+        <div class="parameter-panel">
+            <div class="parameter">
+                <label for="model">Model</label>
+                <select id="model">
+                    <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+                    <option value="gpt-4">gpt-4</option>
+                </select>
+            </div>
+            <div class="parameter">
+                <label for="temperature">Temperature</label>
+                <input type="number" id="temperature" value="1">
+            </div>
+            <div class="parameter">
+                <label for="max-length">Maximum length</label>
+                <input type="number" id="max-length" value="256">
+            </div>
+            <div class="parameter">
+                <label for="stop-sequences">Stop sequences</label>
+                <input type="text" id="stop-sequences">
+            </div>
+            <div class="parameter">
+                <label for="top-p">Top P</label>
+                <input type="number" id="top-p" value="1">
+            </div>
+            <div class="parameter">
+                <label for="frequency-penalty">Frequency penalty</label>
+                <input type="number" id="frequency-penalty" value="0">
+            </div>
+            <div class="parameter">
+                <label for="presence-penalty">Presence penalty</label>
+                <input type="number" id="presence-penalty" value="0">
+            </div>
+        </div>
     </div>
 </template>
 
@@ -22,7 +55,7 @@ import { settings } from '@/store/aiChatState'
 .settings-area {
     background-color: transparent;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: center;
     border-bottom: 1px solid #CCCCCC;
 }

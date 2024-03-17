@@ -1,9 +1,11 @@
 from openai import OpenAI
 import os
 from models.chat import ChatCompletionSettings,ChatCompletionResponse,ChatCompletionStreamResponse
+from models.assistant import AssistantsCreate
 import logging
 from pydantic import  ValidationError
 from typing import Generator
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -19,7 +21,7 @@ def chat_with_openai(messages):
 
     return completion.choices[0].message["content"]
 
-def chat_completions_create(chat_completion_settings:ChatCompletionSettings)->ChatCompletionResponse:
+async def chat_completions_create(chat_completion_settings:ChatCompletionSettings)->ChatCompletionResponse:
     client = OpenAI()
     client.api_key = os.getenv('OPENAI_API_KEY')
     chat_completion_settings_dict = chat_completion_settings.model_dump()
@@ -32,7 +34,7 @@ def chat_completions_create(chat_completion_settings:ChatCompletionSettings)->Ch
 
     return chat_completion_response
 
-def chat_completions_create_stream(chat_completion_settings:ChatCompletionSettings)->Generator[ChatCompletionStreamResponse, None, None]:
+async def chat_completions_create_stream(chat_completion_settings:ChatCompletionSettings)->Generator[ChatCompletionStreamResponse, None, None]:
     client = OpenAI()
     client.api_key = os.getenv('OPENAI_API_KEY')
     chat_completion_settings_dict = chat_completion_settings.model_dump()
@@ -47,3 +49,15 @@ def chat_completions_create_stream(chat_completion_settings:ChatCompletionSettin
         except ValidationError as e:
             logger.error(f"ValidationError occurred: {e}")
 
+def create_assistant(config: AssistantsCreate):
+    client = OpenAI()
+    assistant = client.beta.assistants.create(config)
+    thread = client.beta.threads.create()
+    return assistant,thread
+
+def create_thread():
+    client = OpenAI()
+    assistant = client.beta.assistants.create(config)
+    return assistant
+
+    

@@ -1,9 +1,11 @@
 <template>
     <div class="voice-chat-view">
-        <SettingsArea />
-        <PromptInputArea  />
-        <!-- <button @click="sendMessage">Send Message</button> -->
-        <!-- <input type="text" v-model="text" /> -->
+        <div class="div-1">
+            <PromptInputArea  />
+        </div>
+        <div class="div-2">
+            <SettingsArea />
+        </div>
     </div>
 </template>
 
@@ -11,22 +13,22 @@
 import PromptInputArea from "@/components/AITalk/PromptInputArea.vue";
 import SettingsArea from "@/components/AITalk/SettingsArea.vue";
 import { onBeforeUnmount, onMounted, ref ,watch} from 'vue';
-// import { state,socket } from "@/socket";
 
-
-
-// onBeforeUnmount(() => {
-//     console.log("socket.disconnect")
-//     socket.disconnect();
-// })
-// onMounted(() => {
-//     console.log("socket.connect")
-//     socket.connect()
-// })
-
-// function sendMessage() {
-//     console.log("sendMessage")
-//     const message = 'Hello, server!'; 
-//     socket.emit('message', message);
-// }  
 </script>
+
+<style scoped>
+.voice-chat-view{
+    display: flex;
+    flex-direction: row;
+}
+.div-1{
+    flex-grow: 1;
+}
+
+
+.div-2{
+    width: 200px; 
+}
+
+
+</style>

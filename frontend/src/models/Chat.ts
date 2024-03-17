@@ -45,7 +45,7 @@ export class ChatCompletionSettings {
         model:  "gpt-3.5-turbo" | "gpt-4-1106-preview" | "gpt-4"="gpt-3.5-turbo",
         messages: MessageDto[]=[],
         temperature: number=1,
-        max_tokens: number=1024,
+        max_tokens: number=256,
         top_p: number=1,
         frequency_penalty: number=0,
         presence_penalty: number=0,
