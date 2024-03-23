@@ -37,7 +37,9 @@ watch(windowsWidth,()=>{
 .div-1{
   display: flex;
   flex-direction: row;
-  height: 100vh;
+  height: 100%;
+  width: 100%;
+  flex-grow: 1;
 }
 
 .div-2{

@@ -10,19 +10,17 @@
   },
   "dependencies": {
     "@types/uuid": "^9.0.7",
-    "axios": "^1.4.0",
     "core-js": "^3.8.3",
-    "eslint": "^8.54.0",
-    "eslint-plugin-vue": "^8.7.1",
     "microsoft-cognitiveservices-speech-sdk": "^1.35.0",
     "openai": "^4.28.4",
-    "socket.io-client": "^4.7.2",
     "uuid": "^9.0.1",
     "vue": "^3.2.13",
     "vue-class-component": "^8.0.0-0",
     "vue-router": "^4.2.4"
   },
   "devDependencies": {
+    "eslint": "^8.54.0",
+    "eslint-plugin-vue": "^8.7.1",
     "@babel/core": "^7.12.16",
     "@tsconfig/node18": "^18.2.2",
     "@types/jsdom": "^21.1.3",
