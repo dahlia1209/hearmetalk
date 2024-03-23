@@ -11,7 +11,6 @@ class MessageDto(BaseModel):
     role: Literal["user", "assistant", "system"] = "user"
     content: str = ""
 
-
 class ChatCompletionSettings(BaseModel):
     model: Literal["gpt-3.5-turbo", "gpt-4-1106-preview", "gpt-4"] = "gpt-3.5-turbo"
     messages: List[MessageDto] = []

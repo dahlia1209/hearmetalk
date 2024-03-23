@@ -1,15 +1,5 @@
 <template>
     <div class="settings-area">
-        <label class="label-1">
-            <input type="checkbox" hidden v-model="settings.isSpeechEnabled" />
-            <span class="span-1"></span>
-            音声読み上げ
-        </label>
-        <label class="label-1">
-            <input type="checkbox" hidden v-model="settings.stream" />
-            <span class="span-1"></span>
-            ストリーミング
-        </label>
         <div class="parameter-panel">
             <div class="parameter">
                 <label for="model">Model</label>
@@ -47,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import { settings } from '@/store/aiChatState'
+// import { settings } from '@/store/aiChatState'
 
 </script>
 

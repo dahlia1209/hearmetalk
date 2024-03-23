@@ -79,11 +79,19 @@ cd C:\src\hearmetalk\backend-fastapi\
 az acr build --resource-group nakamura-rg --registry nakamuraacr --image openaicompletions:latest .
 
 #### AKS作成
+az network dns record-set a delete --resource-group nakamura-rg --zone-name hearmetalk.net --name chat --yes
+az network dns record-set a delete --resource-group nakamura-rg --zone-name hearmetalk.net --name speech-to-text  --yes
+az network dns record-set a delete --resource-group nakamura-rg --zone-name hearmetalk.net --name text-to-speech --yes
+az network dns record-set txt delete --resource-group nakamura-rg --zone-name hearmetalk.net --name chat --yes
+az network dns record-set txt delete --resource-group nakamura-rg --zone-name hearmetalk.net --name speech-to-text  --yes
+az network dns record-set txt delete --resource-group nakamura-rg --zone-name hearmetalk.net --name text-to-speech --yes
 az group create --name nakamura-rg-aks --location "japaneast" 
 az aks create --resource-group nakamura-rg-aks --name nakamura-aks  --generate-ssh-keys --attach-acr nakamuraacr  --node-vm-size Standard_B2s_v2 --enable-cluster-autoscaler --min-count 1 --max-count 20 --enable-addons monitoring --enable-app-routing  --node-count 2 
-az aks get-credentials --resource-group nakamura-rg-aks --name nakamura-aks
+az aks get-credentials --resource-group nakamura-rg-aks --name nakamura-aks --overwrite-existing
 $ZONEID=$(az network dns zone show -g nakamura-rg -n hearmetalk.net --query "id" --output tsv)
 az aks approuting zone add -g nakamura-rg-aks -n nakamura-aks --ids=$ZONEID --attach-zones
+$KEYVAULTID=$(az keyvault show --name nakamura-kv --query "id" --output tsv)
+az aks approuting update  --resource-group nakamura-rg-aks --name nakamura-aks --enable-kv --attach-kv $KEYVAULTID
 
 cd .\kubernetes\ 
 kubectl apply -f .\neural-text-to-speech-deployment.yaml
@@ -95,21 +103,14 @@ kubectl apply -f .\openaicompletions-ingress.yaml
 kubectl apply -f .\speech-to-text-deployment.yaml
 kubectl apply -f .\speech-to-text-service.yaml
 kubectl apply -f .\speech-to-text-ingress.yaml
+-- kubectl apply -f .\mssql-deployment.yaml
+-- kubectl apply -f .\mssql-service.yaml
+ 
 kubectl get deployment
 kubectl get service
 kubectl get ingress
 
 ■削除
-kubectl delete -f .\neural-text-to-speech-pod.yaml
-kubectl delete -f .\neural-text-to-speech-service.yaml
-kubectl delete -f .\neural-text-to-speech-ingress.yaml
-kubectl delete -f .\openaicompletions-pod.yaml
-kubectl delete -f .\openaicompletions-service.yaml
-kubectl delete -f .\openaicompletions-ingress.yaml
-kubectl delete -f .\speech-to-text-pod.yaml 
-kubectl delete -f .\speech-to-text-service.yaml
-kubectl delete -f .\speech-to-text-ingress.yaml
-kubectl delete -f .\speech-to-text-deployment.yaml
 az group delete -n nakamura-rg-aks -y
 
 
