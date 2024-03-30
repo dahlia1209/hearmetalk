@@ -182,13 +182,6 @@ async function texttospeech(text: string): Promise<speechsdk.SpeechSynthesisResu
     })
 }
 
-function waitSeconds(seconds: number) {
-    return new Promise(resolve => {
-        setTimeout(() => {
-            resolve(`Waited ${seconds} seconds.`);
-        }, seconds * 1000); // 秒をミリ秒に変換
-    });
-}
 
 </script>
 
