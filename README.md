@@ -92,19 +92,24 @@ $ZONEID=$(az network dns zone show -g nakamura-rg -n hearmetalk.net --query "id"
 az aks approuting zone add -g nakamura-rg-aks -n nakamura-aks --ids=$ZONEID --attach-zones
 $KEYVAULTID=$(az keyvault show --name nakamura-kv --query "id" --output tsv)
 az aks approuting update  --resource-group nakamura-rg-aks --name nakamura-aks --enable-kv --attach-kv $KEYVAULTID
+$IDENTITY_OBJECT_ID=$(az aks show -g nakamura-rg-aks -n nakamura-aks --query addonProfiles.azureKeyvaultSecretsProvider.identity.objectId -o tsv)
+$KEYVAULT_SCOPE=$(az keyvault show --name nakamura-kv --query id -o tsv)
+az role assignment create --role "Key Vault Administrator" --assignee $IDENTITY_OBJECT_ID --scope $KEYVAULT_SCOPE
 
-cd .\kubernetes\ 
+cd C:\src\hearmetalk\kubernetes
+C:\src\hearmetalk\kubernetes\helper.ps1
+kubectl apply -f .\SecretProviderClass.yaml 
 kubectl apply -f .\neural-text-to-speech-deployment.yaml
 kubectl apply -f .\neural-text-to-speech-service.yaml
 kubectl apply -f .\neural-text-to-speech-ingress.yaml
 kubectl apply -f .\openaicompletions-deployment.yaml
 kubectl apply -f .\openaicompletions-service.yaml
 kubectl apply -f .\openaicompletions-ingress.yaml
-kubectl apply -f .\speech-to-text-deployment.yaml
-kubectl apply -f .\speech-to-text-service.yaml
-kubectl apply -f .\speech-to-text-ingress.yaml
 -- kubectl apply -f .\mssql-deployment.yaml
 -- kubectl apply -f .\mssql-service.yaml
+-- kubectl apply -f .\speech-to-text-deployment.yaml
+-- kubectl apply -f .\speech-to-text-service.yaml
+-- kubectl apply -f .\speech-to-text-ingress.yaml
  
 kubectl get deployment
 kubectl get service
@@ -117,3 +122,7 @@ az group delete -n nakamura-rg-aks -y
 ### Tips
 #### 証明書
 https://www.ipentec.com/document/windows-iis-ssl-wild-card-domain-certificate-using-win-acme
+
+cd C:\src\hearmetalk\backend-oauth2
+venv\Scripts\activate    
+uvicorn main:app --reload
