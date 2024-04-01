@@ -38,6 +38,8 @@ jobs:
           VITE_TEXT_TO_SPEECH_CONTAINER_URL: ${{ secrets.VITE_TEXT_TO_SPEECH_CONTAINER_URL }}
           VITE_OAUTH2_REDIRECT_URI: ${{ secrets.VITE_OAUTH2_REDIRECT_URI }}
           VITE_OAUTH2_CLIENT_ID: ${{ secrets.VITE_OAUTH2_CLIENT_ID }}
+          VITE_TEXTANALYTICS_ENDPOINT: ${{ secrets.VITE_TEXTANALYTICS_ENDPOINT }}
+          VITE_TEXTANALYTICS_KEY: ${{ secrets.VITE_TEXTANALYTICS_KEY}}
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'

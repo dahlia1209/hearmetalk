@@ -97,7 +97,8 @@ $KEYVAULT_SCOPE=$(az keyvault show --name nakamura-kv --query id -o tsv)
 az role assignment create --role "Key Vault Administrator" --assignee $IDENTITY_OBJECT_ID --scope $KEYVAULT_SCOPE
 
 cd C:\src\hearmetalk\kubernetes
-Import-Module  C:\src\hearmetalk\kubernetes\helper.ps1
+
+Import-Module C:\src\hearmetalk\kubernetes\helper.psm1
 replaceAksClientId
 replaceIngressWhitelistIp
 replaceServiceWhitelistIp
