@@ -86,7 +86,7 @@ az network dns record-set txt delete --resource-group nakamura-rg --zone-name he
 az network dns record-set txt delete --resource-group nakamura-rg --zone-name hearmetalk.net --name speech-to-text  --yes
 az network dns record-set txt delete --resource-group nakamura-rg --zone-name hearmetalk.net --name text-to-speech --yes
 az group create --name nakamura-rg-aks --location "japaneast" 
-az aks create --resource-group nakamura-rg-aks --name nakamura-aks  --generate-ssh-keys --attach-acr nakamuraacr  --node-vm-size Standard_B2s_v2 --enable-cluster-autoscaler --min-count 1 --max-count 20 --enable-addons monitoring --enable-app-routing  --node-count 2 
+az aks create --resource-group nakamura-rg-aks --name nakamura-aks  --generate-ssh-keys --attach-acr nakamuraacr  --node-vm-size Standard_B8s_v2 --enable-cluster-autoscaler --min-count 1 --max-count 20 --enable-addons monitoring --enable-app-routing  --node-count 1 --enable-aad --aad-admin-group-object-ids 167cbd1d-f736-4590-9154-6c899fb2311d
 az aks get-credentials --resource-group nakamura-rg-aks --name nakamura-aks --overwrite-existing
 $ZONEID=$(az network dns zone show -g nakamura-rg -n hearmetalk.net --query "id" --output tsv)
 az aks approuting zone add -g nakamura-rg-aks -n nakamura-aks --ids=$ZONEID --attach-zones
@@ -97,23 +97,39 @@ $KEYVAULT_SCOPE=$(az keyvault show --name nakamura-kv --query id -o tsv)
 az role assignment create --role "Key Vault Administrator" --assignee $IDENTITY_OBJECT_ID --scope $KEYVAULT_SCOPE
 
 cd C:\src\hearmetalk\kubernetes
-C:\src\hearmetalk\kubernetes\helper.ps1
+Import-Module  C:\src\hearmetalk\kubernetes\helper.ps1
+replaceAksClientId
+replaceIngressWhitelistIp
+replaceServiceWhitelistIp
 kubectl apply -f .\SecretProviderClass.yaml 
+kubectl apply -f .\ubuntu-deployment.yaml
+kubectl apply -f .\ubuntu-service.yaml
 kubectl apply -f .\neural-text-to-speech-deployment.yaml
 kubectl apply -f .\neural-text-to-speech-service.yaml
 kubectl apply -f .\neural-text-to-speech-ingress.yaml
+kubectl apply -f .\neural-text-to-speech-en-deployment.yaml
+kubectl apply -f .\neural-text-to-speech-en-service.yaml
+kubectl apply -f .\neural-text-to-speech-en-ingress.yaml
 kubectl apply -f .\openaicompletions-deployment.yaml
 kubectl apply -f .\openaicompletions-service.yaml
 kubectl apply -f .\openaicompletions-ingress.yaml
--- kubectl apply -f .\mssql-deployment.yaml
--- kubectl apply -f .\mssql-service.yaml
--- kubectl apply -f .\speech-to-text-deployment.yaml
--- kubectl apply -f .\speech-to-text-service.yaml
--- kubectl apply -f .\speech-to-text-ingress.yaml
+#kubectl apply -f .\mssql-deployment.yaml
+#kubectl apply -f .\mssql-service.yaml
+#kubectl apply -f .\speech-to-text-deployment.yaml
+#kubectl apply -f .\speech-to-text-service.yaml
+#kubectl apply -f .\speech-to-text-ingress.yaml
+az aks update -g nakamura-rg-aks -n nakamura-aks --enable-aad --aad-admin-group-object-ids 167cbd1d-f736-4590-9154-6c899fb2311d
  
 kubectl get deployment
 kubectl get service
 kubectl get ingress
+
+■Ubuntuのコマンド
+sudo apt-get -y update
+sudo apt install -y obs-studio ffmpeg v4l2loopback-dkms language-pack-ja fonts-ipafont fonts-ipaexfont wget
+fc-cache -fv 
+wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+sudo apt install /config/google-chrome-stable_current_amd64.deb -y
 
 ■削除
 az group delete -n nakamura-rg-aks -y

@@ -13,8 +13,13 @@ onMounted(() => {
     const params = new URLSearchParams(hash.substring(1));
     const access_token = params.get('access_token');
     const expires_in = params.get('expires_in');
+    const state = params.get('state');
 
-    if (access_token&&expires_in) {
+    if(!state || state!==localStorage.getItem('state')){
+        errorMessageRef.value = "検証失敗"
+    }
+
+    if (access_token && expires_in) {
         localStorage.setItem('access_token', access_token);
         localStorage.setItem('expires_in', expires_in);
         window.close()

@@ -4,12 +4,14 @@ export class Message {
     public content: string;
     public role: "user" | "assistant" | "system";
     public roleDisplay:string;
+    public authorId:string|undefined
 
-    constructor(messageId: string = uuidv4(),  content: string = "", role: "user" | "assistant" | "system" = "user",roleDisplay="") {
+    constructor(messageId: string = uuidv4(),  content: string = "", role: "user" | "assistant" | "system" = "user",roleDisplay="",authorId=undefined) {
         this.messageId = messageId;
         this.content = content;
         this.role = role;
         this.roleDisplay=roleDisplay
+        this.authorId=authorId
     }
 
     toDto(): MessageDto {
