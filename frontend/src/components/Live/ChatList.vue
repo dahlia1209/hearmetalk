@@ -14,13 +14,15 @@
                 </div>
                 <!-- 他のチャットメッセージを追加 -->
             </div>
-            <div class="div-3">
+            <!-- <div class="div-3">
                 <textarea class="div-5" placeholder="チャット..." v-model="messageContent"></textarea>
                 <div class="div-6" @click="messageContent === '' ? '' : handleReplying(messageContent)"><img
                         src="@/assets/submit.svg" alt=""></div>
-            </div>
-            <button class="div-6" @click="startReadMessageProcess(5000)">startReadMessageProcess</button>
+            </div> -->
+            <button class="div-6"
+                @click="handleGetAccessToken(); startReadMessageProcess(5000)">startReadMessageProcess</button>
             <button class="div-6" @click="stopReadMessageProcess">stopReadMessageProcess</button>
+            <button class="div-6" @click="">detectLanguage</button>
 
         </div>
     </div>
@@ -32,7 +34,10 @@ import * as chatServices from "@/services/chatServices"
 import * as speechsdk from "microsoft-cognitiveservices-speech-sdk"
 import * as liveServices from "@/services/liveServices"
 import * as oauthServices from "@/services/oauthServices"
+import * as speechServices from "@/services/speechServices"
 import * as LiveModel from "@/models/Live"
+import { TextAnalysisClient, AzureKeyCredential, type DetectedLanguage } from "@azure/ai-language-text"
+
 
 const messageContent = ref("")
 const replyContent = ref("")
@@ -43,7 +48,7 @@ const isSpeakingRef = ref(false)
 const processRef = ref<NodeJS.Timeout | undefined>()
 const processedMessageIdsRef = ref(new Set())
 const isReadingMessageRef = ref(false)
-const tokenRef = ref<LiveModel.Token>({ access_token: null, expired_time:undefined, expires_in:null })
+const tokenRef = ref<LiveModel.Token>({ access_token: null, expired_time: undefined, expires_in: null })
 const liveChatIdRef = ref<undefined | string>(undefined)
 
 // watch(isSpeaking, () => {
@@ -53,8 +58,10 @@ const liveChatIdRef = ref<undefined | string>(undefined)
 // })
 
 onMounted(() => {
-    addMessageToChat("You are a friend. You reply in Japanese. You reply with the content of daily conversation.", "system", "system");
-    initSpeechSynthesizer()
+    systemmessageRef.value = new chatModel.Message();
+    systemmessageRef.value.content = "You are a friend. You reply with the content of daily conversation. You are available in Japanese and English only. If you are asked a question in Japanese, you will respond in Japanese; if you are asked a question in English, you will respond in English."
+    systemmessageRef.value.role = "system"
+    systemmessageRef.value.roleDisplay = "りあら"
 })
 
 onUnmounted(() => {
@@ -66,7 +73,7 @@ onUnmounted(() => {
 
 function startReadMessageProcess(ms: number) {
     processRef.value = setInterval(() => {
-        readMessage()
+        responseMessage()
     }, ms);
     console.log("読み上げを開始します。")
     return processRef.value
@@ -78,18 +85,51 @@ function stopReadMessageProcess() {
     console.log("読み上げを停止します。")
 }
 
+async function handleGetAccessToken() {
+    if (!tokenRef.value.access_token || !tokenRef.value.expired_time || tokenRef.value.expired_time < new Date()) {
+        tokenRef.value = await waitForGetAccessToken()
+    }
+    return true;
+}
 
-const readMessage = async () => {
+// const readMessage = async () => {
+//     if (isReadingMessageRef.value || isSpeakingRef.value) {
+//         return;
+//     }
+//     if (!liveChatIdRef.value && tokenRef.value.access_token) {
+//         liveChatIdRef.value = await liveServices.getLiveChatId(tokenRef.value.access_token)
+//     }
+//     isReadingMessageRef.value = true
+//     try {
+//         if (tokenRef.value.access_token && liveChatIdRef.value) {
+//             const LiveChatMessages = await liveServices.getLatestLiveChat(tokenRef.value.access_token, liveChatIdRef.value)
+//             if (LiveChatMessages) {
+//                 for (const LiveChatMessage of LiveChatMessages) {
+//                     if (!processedMessageIdsRef.value.has(LiveChatMessage.id)) {
+//                         const speechSynthesizer = initSpeechSynthesizer()
+//                         isSpeakingRef.value = true
+//                         speechServices.textToSpeech(speechSynthesizer, LiveChatMessage.snippet.textMessageDetails.messageText)
+//                         processedMessageIdsRef.value.add(LiveChatMessage.id);
+//                         addMessageToChat(LiveChatMessage.snippet.textMessageDetails.messageText, "user", LiveChatMessage.authorDetails.displayName)
+//                         await waitForSpeechSynthesizerToClose()
+//                     }
+//                 }
+//             }
+//         }
+//     } catch (error) {
+//         console.error('Failed to fetch messages:', error);
+//     } finally {
+//         isReadingMessageRef.value = false
+//     }
+// }
+
+
+const responseMessage = async () => {
     if (isReadingMessageRef.value || isSpeakingRef.value) {
         return;
     }
-    if (!tokenRef.value.access_token || !tokenRef.value.expired_time || tokenRef.value.expired_time < new Date()) {
-        tokenRef.value = await waitForGetAccessToken()
-        console.log(tokenRef.value)
-    }
-    if (!liveChatIdRef.value&&tokenRef.value.access_token) {
+    if (!liveChatIdRef.value && tokenRef.value.access_token) {
         liveChatIdRef.value = await liveServices.getLiveChatId(tokenRef.value.access_token)
-        console.log("liveChatIdRef.value",liveChatIdRef.value)
     }
     isReadingMessageRef.value = true
     try {
@@ -98,11 +138,17 @@ const readMessage = async () => {
             if (LiveChatMessages) {
                 for (const LiveChatMessage of LiveChatMessages) {
                     if (!processedMessageIdsRef.value.has(LiveChatMessage.id)) {
-                        const speechSynthesizer = initSpeechSynthesizer()
+                        // console.log(LiveChatMessage)
+                        const message = LiveChatMessage.snippet.textMessageDetails.messageText;
+                        const authorId = LiveChatMessage.authorDetails.channelId
+                        addMessageToChat(message, "user", LiveChatMessage.authorDetails.displayName, authorId)
+                        const language = await detectLanguage(message)
+                        const response = language === "en" || language === "ja" ? await chatCompletions(message, authorId) : "Sorry, we only support Japanese or English."
+                        const speechSynthesizer = language === undefined ? initSpeechSynthesizer("en") : initSpeechSynthesizer(language)
                         isSpeakingRef.value = true
-                        texttospeech(speechSynthesizer, LiveChatMessage.snippet.textMessageDetails.messageText)
+                        // speechServices.textToSpeech(speechSynthesizer, response)
+                        speechServices.textToSpeech(speechSynthesizer, response)
                         processedMessageIdsRef.value.add(LiveChatMessage.id);
-                        addMessageToChat(LiveChatMessage.snippet.textMessageDetails.messageText, "user", "匿名")
                         await waitForSpeechSynthesizerToClose()
                     }
                 }
@@ -115,6 +161,18 @@ const readMessage = async () => {
     }
 }
 
+const detectLanguage = async (text: string) => {
+    const client = new TextAnalysisClient(import.meta.env.VITE_TEXTANALYTICS_ENDPOINT, new AzureKeyCredential(import.meta.env.VITE_TEXTANALYTICS_KEY));
+    const result = await client.analyze("LanguageDetection", [text]);
+    if (!result[0]) {
+        return undefined
+    }
+    if (result[0].error) {
+        return undefined
+    }
+    return result[0].primaryLanguage.iso6391Name
+}
+
 function waitForGetAccessToken() {
     localStorage.removeItem('access_token')
     localStorage.removeItem('expires_in')
@@ -124,10 +182,10 @@ function waitForGetAccessToken() {
         const checkClose = setInterval(() => {
             const accessToken = localStorage.getItem('access_token')
             const expiresIn = Number(localStorage.getItem('expires_in'))
-            if (accessToken&&expiresIn) {
+            if (accessToken && expiresIn) {
                 clearInterval(checkClose);
-                const expiredTime= new Date(new Date().getTime() + expiresIn * 1000);
-                const token:LiveModel.Token={access_token:accessToken,expired_time:expiredTime,expires_in:expiresIn}
+                const expiredTime = new Date(new Date().getTime() + expiresIn * 1000);
+                const token: LiveModel.Token = { access_token: accessToken, expired_time: expiredTime, expires_in: expiresIn }
                 resolve(token);
             }
         }, interval);
@@ -135,10 +193,19 @@ function waitForGetAccessToken() {
 }
 
 function waitForSpeechSynthesizerToClose() {
+    let count = 0;
+    const maxWaitMS = 30000;
+    const interval = 100;
+    const iterationCount = Math.floor(maxWaitMS / interval);
     return new Promise<void>((resolve) => {
-        const interval = 100;
         const checkClose = setInterval(() => {
+            count++
             if (!isSpeakingRef.value) {
+                clearInterval(checkClose);
+                resolve();
+            }
+            if (count > iterationCount) {
+                isSpeakingRef.value = false
                 clearInterval(checkClose);
                 resolve();
             }
@@ -147,29 +214,32 @@ function waitForSpeechSynthesizerToClose() {
 }
 
 
-async function handleReplying(content: string) {
-    const contents = await chatCompletions(content)
-    replyContent.value = contents;
-    const speechSynthesizer = initSpeechSynthesizer()
-    await texttospeech(speechSynthesizer, contents).then(async (result) => {
-        console.log('音声を再生します。')
-        // await waitSeconds(result.audioDuration) 
-    }).catch((error) => {
+// async function handleReplying(content: string) {
+//     const contents = await chatCompletions(content)
+//     replyContent.value = contents;
+//     const speechSynthesizer = initSpeechSynthesizer()
+//     await speechServices.texttospeech(speechSynthesizer, contents).then(async (result) => {
+//         console.log('音声を再生します。')
+//         // await waitSeconds(result.audioDuration) 
+//     }).catch((error) => {
 
-    })
-}
+//     })
+// }
 
-function addMessageToChat(content: string, role: "user" | "assistant" | "system", roleDisplay: string): chatModel.Message {
+function addMessageToChat(content: string, role: "user" | "assistant" | "system", roleDisplay: string, authorId: chatModel.Message["authorId"] = undefined): chatModel.Message {
     const message = new chatModel.Message();
     message.content = content;
     message.role = role;
     message.roleDisplay = roleDisplay;
+    if (authorId) {
+        message.authorId = authorId
+    }
     messages.value.push(message);
     return message
 }
 
-function initSpeechSynthesizer() {
-    const url = new URL(import.meta.env.VITE_TEXT_TO_SPEECH_CONTAINER_URL)
+function initSpeechSynthesizer(language: DetectedLanguage["iso6391Name"]) {
+    const url = language === "en" ? new URL(import.meta.env.VITE_TEXT_TO_SPEECH_EN_CONTAINER_URL) : language === "ja" ? new URL(import.meta.env.VITE_TEXT_TO_SPEECH_CONTAINER_URL) : new URL(import.meta.env.VITE_TEXT_TO_SPEECH_EN_CONTAINER_URL)
     const speechConfig = speechsdk.SpeechConfig.fromHost(url)
     const player = new speechsdk.SpeakerAudioDestination();
     player.onAudioStart = function (_) {
@@ -179,16 +249,28 @@ function initSpeechSynthesizer() {
         isSpeakingRef.value = false
     };
     const audioConfig = speechsdk.AudioConfig.fromSpeakerOutput(player);
-    const speechSynthesizer = new speechsdk.SpeechSynthesizer(speechConfig, audioConfig);
-    // speechSynthesizerRef.value = new speechsdk.SpeechSynthesizer(speechConfig, audioConfig);
+
+    const speechSynthesizer = new speechsdk.SpeechSynthesizer(speechConfig, audioConfig)
     return speechSynthesizer
 }
 
-async function chatCompletions(text: string) {
-    function createMessageDtos() {
-        return systemmessageRef.value.content == "" ?
-            [...messages.value.map(message => message.toDto())] :
-            [systemmessageRef.value.toDto(), ...messages.value.map(message => message.toDto())];
+
+
+async function chatCompletions(text: string, authorId: chatModel.Message["authorId"] = undefined): Promise<string> {
+    function createMessageDtos(authorId: chatModel.Message["authorId"] = undefined) {
+        if (authorId) {
+            const filteredMessages = messages.value.filter(message => message.authorId === authorId);
+            const messageDtos = systemmessageRef.value.content == "" ?
+                [...filteredMessages.map(message => message.toDto())] :
+                [systemmessageRef.value.toDto(), ...filteredMessages.map(message => message.toDto())];
+            console.log(messageDtos)
+            return messageDtos;
+        } else {
+            const messageDtos = systemmessageRef.value.content == "" ?
+                [...messages.value.map(message => message.toDto())] :
+                [systemmessageRef.value.toDto(), ...messages.value.map(message => message.toDto())];
+            return messageDtos;
+        }
     }
 
     function createChatCompletionSettings(messageDtos: chatModel.MessageDto[]) {
@@ -202,39 +284,20 @@ async function chatCompletions(text: string) {
             contentsArray.push(chunk);
         }
         const contents = contentsArray.join("");
-        addMessageToChat(contents, "assistant", "りあら")
+        if (authorId) {
+            addMessageToChat(contents, "assistant", "りあら", authorId)
+
+        } else {
+
+            addMessageToChat(contents, "assistant", "りあら")
+        }
         return contents;
     }
-
-    addMessageToChat(text, "user", "あなた")
-    const messageDtos = createMessageDtos();
+    const messageDtos = createMessageDtos(authorId);
     const chatCompletionSettings = createChatCompletionSettings(messageDtos);
     const contents = await handleStream(chatCompletionSettings);
     return contents
 }
-
-async function texttospeech(speechSynthesizer: speechsdk.SpeechSynthesizer, text: string): Promise<speechsdk.SpeechSynthesisResult> {
-    return new Promise((resolve, reject) => {
-        if (speechSynthesizer) {
-            speechSynthesizer.speakTextAsync(
-                text,
-                result => {
-                    if (result.reason === speechsdk.ResultReason.SynthesizingAudioCompleted) {
-                        resolve(result);
-                    } else {
-                        reject(result);
-                    }
-                    speechSynthesizer.close();
-                },
-                error => {
-                    speechSynthesizer.close();
-                    throw new Error(error);
-                }
-            )
-        }
-    })
-}
-
 
 </script>
 <style scoped>

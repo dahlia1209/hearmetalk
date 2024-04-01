@@ -18,6 +18,18 @@ export namespace LiveChatMessages {
     etag: string;
     id: string;
     snippet: LiveChatMessageSnippet;
+    authorDetails: LiveChatMessageAuthorDetails;
+  }
+
+  interface LiveChatMessageAuthorDetails{
+    channelId: string;
+    channelUrl: string;
+    displayName: string;
+    profileImageUrl: string;
+    isVerified: boolean;
+    isChatOwner: boolean;
+    isChatSponsor: boolean;
+    isChatModerator: boolean;
   }
 
   interface LiveChatMessageSnippet {

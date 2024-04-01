@@ -39,7 +39,7 @@ export const getLatestLiveChat = async (accessToken:string,liveChatId:string):Pr
         const params = {
             access_token: accessToken,
             liveChatId: liveChatId,
-            part: "id,snippet"
+            part: "id,snippet,authorDetails"
         };
         const queryString = new URLSearchParams(params).toString();
 
