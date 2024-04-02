@@ -1,11 +1,11 @@
 <template>
     <div class="div-1" ref="div1">
-        <video v-if="isSwitchRef" width="320" height="240"  ref="video1" >
+        <!-- <video v-if="isSwitchRef" width="320" height="240"  ref="video1" >
             <source src="@/assets/listening.webm" type="video/webm">
         </video>
         <video v-else-if="!isSwitchRef"  width="320" height="240"  ref="video1" >
             <source src="@/assets/speaking.webm" type="video/webm">
-        </video>
+        </video> -->
 
         <button @click="switchMovie()">switch</button>
         <button @click="playVideo()">Play</button>
