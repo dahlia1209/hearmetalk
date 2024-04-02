@@ -8,7 +8,7 @@
             <div class="div-1">
                 トップチャット
             </div>
-            <div class="div-2">
+            <div class="div-2" ref="div2Ref">
                 <div class="div-4" v-for="message in messages">
                     {{ `${message.roleDisplay}:${message.content}` }}
                 </div>
@@ -50,6 +50,7 @@ const processedMessageIdsRef = ref(new Set())
 const isReadingMessageRef = ref(false)
 const tokenRef = ref<LiveModel.Token>({ access_token: null, expired_time: undefined, expires_in: null })
 const liveChatIdRef = ref<undefined | string>(undefined)
+const div2Ref=ref<null|HTMLDivElement>(null)
 
 // watch(isSpeaking, () => {
 //     if (!isSpeaking.value) {
@@ -92,42 +93,11 @@ async function handleGetAccessToken() {
     return true;
 }
 
-// const readMessage = async () => {
-//     if (isReadingMessageRef.value || isSpeakingRef.value) {
-//         return;
-//     }
-//     if (!liveChatIdRef.value && tokenRef.value.access_token) {
-//         liveChatIdRef.value = await liveServices.getLiveChatId(tokenRef.value.access_token)
-//     }
-//     isReadingMessageRef.value = true
-//     try {
-//         if (tokenRef.value.access_token && liveChatIdRef.value) {
-//             const LiveChatMessages = await liveServices.getLatestLiveChat(tokenRef.value.access_token, liveChatIdRef.value)
-//             if (LiveChatMessages) {
-//                 for (const LiveChatMessage of LiveChatMessages) {
-//                     if (!processedMessageIdsRef.value.has(LiveChatMessage.id)) {
-//                         const speechSynthesizer = initSpeechSynthesizer()
-//                         isSpeakingRef.value = true
-//                         speechServices.textToSpeech(speechSynthesizer, LiveChatMessage.snippet.textMessageDetails.messageText)
-//                         processedMessageIdsRef.value.add(LiveChatMessage.id);
-//                         addMessageToChat(LiveChatMessage.snippet.textMessageDetails.messageText, "user", LiveChatMessage.authorDetails.displayName)
-//                         await waitForSpeechSynthesizerToClose()
-//                     }
-//                 }
-//             }
-//         }
-//     } catch (error) {
-//         console.error('Failed to fetch messages:', error);
-//     } finally {
-//         isReadingMessageRef.value = false
-//     }
-// }
-
-
 const responseMessage = async () => {
     if (isReadingMessageRef.value || isSpeakingRef.value) {
         return;
     }
+    handleGetAccessToken()
     if (!liveChatIdRef.value && tokenRef.value.access_token) {
         liveChatIdRef.value = await liveServices.getLiveChatId(tokenRef.value.access_token)
     }
@@ -142,11 +112,14 @@ const responseMessage = async () => {
                         const message = LiveChatMessage.snippet.textMessageDetails.messageText;
                         const authorId = LiveChatMessage.authorDetails.channelId
                         addMessageToChat(message, "user", LiveChatMessage.authorDetails.displayName, authorId)
+                        scrollToBottom()
                         const language = await detectLanguage(message)
                         const response = language === "en" || language === "ja" ? await chatCompletions(message, authorId) : "Sorry, we only support Japanese or English."
+                        replyContent.value=response
                         const speechSynthesizer = language === undefined ? initSpeechSynthesizer("en") : initSpeechSynthesizer(language)
                         isSpeakingRef.value = true
-                        // speechServices.textToSpeech(speechSynthesizer, response)
+                        console.log(speechSynthesizer)
+                        console.log("response",response)
                         speechServices.textToSpeech(speechSynthesizer, response)
                         processedMessageIdsRef.value.add(LiveChatMessage.id);
                         await waitForSpeechSynthesizerToClose()
@@ -238,6 +211,12 @@ function addMessageToChat(content: string, role: "user" | "assistant" | "system"
     return message
 }
 
+function scrollToBottom(){
+    if(div2Ref.value){
+        div2Ref.value.scrollTop=div2Ref.value.scrollHeight;
+    }
+}
+
 function initSpeechSynthesizer(language: DetectedLanguage["iso6391Name"]) {
     const url = language === "en" ? new URL(import.meta.env.VITE_TEXT_TO_SPEECH_EN_CONTAINER_URL) : language === "ja" ? new URL(import.meta.env.VITE_TEXT_TO_SPEECH_CONTAINER_URL) : new URL(import.meta.env.VITE_TEXT_TO_SPEECH_EN_CONTAINER_URL)
     const speechConfig = speechsdk.SpeechConfig.fromHost(url)
@@ -286,10 +265,11 @@ async function chatCompletions(text: string, authorId: chatModel.Message["author
         const contents = contentsArray.join("");
         if (authorId) {
             addMessageToChat(contents, "assistant", "りあら", authorId)
-
+            scrollToBottom()
         } else {
 
             addMessageToChat(contents, "assistant", "りあら")
+            scrollToBottom()
         }
         return contents;
     }
