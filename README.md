@@ -82,9 +82,11 @@ az acr build --resource-group nakamura-rg --registry nakamuraacr --image openaic
 az network dns record-set a delete --resource-group nakamura-rg --zone-name hearmetalk.net --name chat --yes
 az network dns record-set a delete --resource-group nakamura-rg --zone-name hearmetalk.net --name speech-to-text  --yes
 az network dns record-set a delete --resource-group nakamura-rg --zone-name hearmetalk.net --name text-to-speech --yes
+az network dns record-set a delete --resource-group nakamura-rg --zone-name hearmetalk.net --name text-to-speech-en --yes
 az network dns record-set txt delete --resource-group nakamura-rg --zone-name hearmetalk.net --name chat --yes
 az network dns record-set txt delete --resource-group nakamura-rg --zone-name hearmetalk.net --name speech-to-text  --yes
 az network dns record-set txt delete --resource-group nakamura-rg --zone-name hearmetalk.net --name text-to-speech --yes
+az network dns record-set txt delete --resource-group nakamura-rg --zone-name hearmetalk.net --name text-to-speech-en --yes
 az group create --name nakamura-rg-aks --location "japaneast" 
 az aks create --resource-group nakamura-rg-aks --name nakamura-aks  --generate-ssh-keys --attach-acr nakamuraacr  --node-vm-size Standard_B8s_v2 --enable-cluster-autoscaler --min-count 1 --max-count 20 --enable-addons monitoring --enable-app-routing  --node-count 1 --enable-aad --aad-admin-group-object-ids 167cbd1d-f736-4590-9154-6c899fb2311d
 az aks get-credentials --resource-group nakamura-rg-aks --name nakamura-aks --overwrite-existing

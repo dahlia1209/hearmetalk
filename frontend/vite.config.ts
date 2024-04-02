@@ -15,6 +15,7 @@ export default defineConfig({
     }
   },
   server: {
-    host:true
-}
+    host: true
+  },
+  assetsInclude: ['**/*.mov']
 })

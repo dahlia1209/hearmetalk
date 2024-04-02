@@ -48,3 +48,5 @@ secret.json
 
 # 整理中
 kubernetes/
+frontend/src/assets/listening.*
+frontend/src/assets/speaking.*
