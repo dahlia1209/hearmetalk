@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ubuntu-xfce-desktop-lb-service
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 3389
+    targetPort: 3389
+    protocol: TCP
+  selector:
+    app: ubuntu-xfce-desktop
+  loadBalancerSourceRanges:
+    - 126.117.183.184/32 #myGlobalIp
+    

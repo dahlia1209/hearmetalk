@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openaicompletions-deployment
+  labels:
+    app: openaicompletions
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: openaicompletions
+  template:
+    metadata:
+      labels:
+        app: openaicompletions
+    spec:
+      containers:
+      - name: openaicompletions
+        image: nakamuraacr.azurecr.io/openaicompletions:latest
+        ports: 
+          - containerPort: 3100

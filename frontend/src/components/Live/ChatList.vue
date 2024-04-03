@@ -31,7 +31,7 @@
 import { onMounted, ref, onUnmounted, watch } from 'vue';
 import * as chatModel from "@/models/Chat"
 import * as chatServices from "@/services/chatServices"
-import * as speechsdk from "microsoft-cognitiveservices-speech-sdk"
+import {SpeechConfig,SpeechSynthesizer,SpeakerAudioDestination,AudioConfig} from "microsoft-cognitiveservices-speech-sdk"
 import * as liveServices from "@/services/liveServices"
 import * as oauthServices from "@/services/oauthServices"
 import * as speechServices from "@/services/speechServices"
@@ -43,7 +43,7 @@ const messageContent = ref("")
 const replyContent = ref("")
 const messages = ref<chatModel.Message[]>([])
 const systemmessageRef = ref<chatModel.Message>(new chatModel.Message())
-const speechSynthesizerRef = ref<speechsdk.SpeechSynthesizer | null>(null)
+const speechSynthesizerRef = ref<SpeechSynthesizer | null>(null)
 const isSpeakingRef = ref(false)
 const processRef = ref<NodeJS.Timeout | undefined>()
 const processedMessageIdsRef = ref(new Set())
@@ -219,17 +219,17 @@ function scrollToBottom(){
 
 function initSpeechSynthesizer(language: DetectedLanguage["iso6391Name"]) {
     const url = language === "en" ? new URL(import.meta.env.VITE_TEXT_TO_SPEECH_EN_CONTAINER_URL) : language === "ja" ? new URL(import.meta.env.VITE_TEXT_TO_SPEECH_CONTAINER_URL) : new URL(import.meta.env.VITE_TEXT_TO_SPEECH_EN_CONTAINER_URL)
-    const speechConfig = speechsdk.SpeechConfig.fromHost(url)
-    const player = new speechsdk.SpeakerAudioDestination();
+    const speechConfig = SpeechConfig.fromHost(url)
+    const player = new SpeakerAudioDestination();
     player.onAudioStart = function (_) {
         isSpeakingRef.value = true
     }
     player.onAudioEnd = function (_) {
         isSpeakingRef.value = false
     };
-    const audioConfig = speechsdk.AudioConfig.fromSpeakerOutput(player);
+    const audioConfig = AudioConfig.fromSpeakerOutput(player);
 
-    const speechSynthesizer = new speechsdk.SpeechSynthesizer(speechConfig, audioConfig)
+    const speechSynthesizer = new SpeechSynthesizer(speechConfig, audioConfig)
     return speechSynthesizer
 }
 

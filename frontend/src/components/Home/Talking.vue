@@ -22,17 +22,17 @@ import micIconMono from "@/assets/MicIconMono.svg"
 import videoIcon from "@/assets/VideoIcon.svg"
 import * as chatModel from "@/models/Chat"
 import * as chatServices from "@/services/chatServices"
-import * as speechsdk from "microsoft-cognitiveservices-speech-sdk"
-import { onMounted, onUnmounted, ref, onBeforeUnmount,watch } from 'vue';
+import { SpeechRecognizer, SpeechSynthesizer, SpeechConfig, AudioConfig, SpeakerAudioDestination, SpeechSynthesisResult, ResultReason } from "microsoft-cognitiveservices-speech-sdk"
+import { onMounted, onUnmounted, ref, onBeforeUnmount, watch } from 'vue';
 
 const messages = ref<chatModel.Message[]>([])
 const systemmessage = ref<chatModel.Message>(new chatModel.Message())
-const speechRecognizerRef = ref<speechsdk.SpeechRecognizer | null>(null)
-const speechSynthesizerRef = ref<speechsdk.SpeechSynthesizer | null>(null)
-const isAudioPlaying =ref(false)
+const speechRecognizerRef = ref<SpeechRecognizer | null>(null)
+const speechSynthesizerRef = ref<SpeechSynthesizer | null>(null)
+const isAudioPlaying = ref(false)
 
-watch(isAudioPlaying,()=>{
-    if(!isAudioPlaying.value){
+watch(isAudioPlaying, () => {
+    if (!isAudioPlaying.value) {
         initSpeechSynthesizer()
         handleTalking()
     }
@@ -45,29 +45,29 @@ onMounted(() => {
     handleTalking()
 })
 
-function initSpeechRecognizer(){
+function initSpeechRecognizer() {
     const url = new URL(import.meta.env.VITE_SPEECH_TO_TEXT_CONTAINER_URL)
-    const speechConfig=speechsdk.SpeechConfig.fromHost(url)
-    speechRecognizerRef.value = new speechsdk.SpeechRecognizer(speechConfig)
+    const speechConfig = SpeechConfig.fromHost(url)
+    speechRecognizerRef.value = new SpeechRecognizer(speechConfig)
 }
 
-function initSpeechSynthesizer(){
+function initSpeechSynthesizer() {
     const url = new URL(import.meta.env.VITE_TEXT_TO_SPEECH_CONTAINER_URL)
-    const speechConfig=speechsdk.SpeechConfig.fromHost(url)
-    const player = new speechsdk.SpeakerAudioDestination();
-        player.onAudioStart = function(_) {
-            isAudioPlaying.value=true
-        }
-        player.onAudioEnd = function (_) {
-            isAudioPlaying.value=false
-        };
-    const audioConfig  = speechsdk.AudioConfig.fromSpeakerOutput(player);
-    speechSynthesizerRef.value = new speechsdk.SpeechSynthesizer(speechConfig,audioConfig);
+    const speechConfig = SpeechConfig.fromHost(url)
+    const player = new SpeakerAudioDestination();
+    player.onAudioStart = function (_) {
+        isAudioPlaying.value = true
+    }
+    player.onAudioEnd = function (_) {
+        isAudioPlaying.value = false
+    };
+    const audioConfig = AudioConfig.fromSpeakerOutput(player);
+    speechSynthesizerRef.value = new SpeechSynthesizer(speechConfig, audioConfig);
 }
 
 onUnmounted(() => {
     if (speechRecognizerRef.value) {
-        
+
         speechRecognizerRef.value.close()
     }
     if (speechSynthesizerRef.value) {
@@ -161,13 +161,13 @@ function addMessageToChat(content: string, role: "user" | "assistant" | "system"
     return message
 }
 
-async function texttospeech(text: string): Promise<speechsdk.SpeechSynthesisResult> {
+async function texttospeech(text: string): Promise<SpeechSynthesisResult> {
     return new Promise((resolve, reject) => {
         if (speechSynthesizerRef.value) {
             speechSynthesizerRef.value.speakTextAsync(
                 text,
                 result => {
-                    if (result.reason === speechsdk.ResultReason.SynthesizingAudioCompleted) {
+                    if (result.reason === ResultReason.SynthesizingAudioCompleted) {
                         resolve(result);
                     } else {
                         reject(result);

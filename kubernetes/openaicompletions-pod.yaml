@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: openaicompletions
+  labels:
+    app: openaicompletions
+spec:
+  containers:
+    - name: openaicompletions
+      image: nakamuraacr.azurecr.io/openaicompletions:latest
+      ports:
+        - containerPort: 3100

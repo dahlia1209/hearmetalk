@@ -102,11 +102,11 @@ cd C:\src\hearmetalk\kubernetes
 
 Import-Module C:\src\hearmetalk\kubernetes\helper.psm1
 replaceAksClientId
-replaceIngressWhitelistIp
 replaceServiceWhitelistIp
 kubectl apply -f .\SecretProviderClass.yaml 
 kubectl apply -f .\ubuntu-deployment.yaml
 kubectl apply -f .\ubuntu-service.yaml
+replaceIngressWhitelistIp
 kubectl apply -f .\neural-text-to-speech-deployment.yaml
 kubectl apply -f .\neural-text-to-speech-service.yaml
 kubectl apply -f .\neural-text-to-speech-ingress.yaml

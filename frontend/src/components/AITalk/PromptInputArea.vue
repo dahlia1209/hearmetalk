@@ -7,7 +7,7 @@
                     <div class="div-3">{{ message.roleDisplay }}</div>
                     <div v-if="message.role !== 'system'" class="div-5">{{ message.content }} </div>
                     <textarea class="textarea-2" v-else v-model="message.content">{{ message.content }}</textarea>
-                    
+
                 </div>
             </div>
         </div>
@@ -40,13 +40,8 @@
 import { resize } from "@/utils/htmlElementUtils"
 import { onMounted, onUnmounted, ref, watch, watchEffect, withScopeId } from 'vue';
 import * as chatModel from "@/models/Chat"
-import * as assistantModel from "@/models/Assistant"
 import * as chatServices from "@/services/chatServices"
-import * as speechsdk from "microsoft-cognitiveservices-speech-sdk";
-import { AudioData, MimeTypeMapper } from "@/models/SpeechToText"
-import { Speaker } from "@/models/TextToSpeech"
-// import { submitText } from "@/services/textToSpeechServices";
-// import { settings } from '@/store/aiChatState'
+import { SpeechConfig, SpeechRecognizer, ResultReason, SpeechSynthesizer } from "microsoft-cognitiveservices-speech-sdk";
 
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
 const isWaitingForSubmit = ref(true)
@@ -55,7 +50,7 @@ const messages = ref<chatModel.Message[]>([])
 const systemmessage = ref<chatModel.Message>(new chatModel.Message())
 const textareaInput = ref<string>("")
 const audioPlayerRef = ref<HTMLAudioElement | null>(null)
-const speechRecognizerRef = ref<speechsdk.SpeechRecognizer | null>(null)
+const speechRecognizerRef = ref<SpeechRecognizer | null>(null)
 const editablemessageId = ref("")
 
 onMounted(() => {
@@ -111,11 +106,11 @@ async function handleStartRecording() {
 
     async function startRecording(): Promise<void> {
         const url = new URL(import.meta.env.VITE_SPEECH_TO_TEXT_CONTAINER_URL)
-        const speechConfig = speechsdk.SpeechConfig.fromHost(url);
+        const speechConfig = SpeechConfig.fromHost(url);
         // targetMessageRef.value = addMessageToChat("", "user", "あなた");
-        speechRecognizerRef.value = new speechsdk.SpeechRecognizer(speechConfig)
+        speechRecognizerRef.value = new SpeechRecognizer(speechConfig)
         speechRecognizerRef.value.recognizing = (s, e) => {
-            if (e.result.reason === speechsdk.ResultReason.RecognizingSpeech) {
+            if (e.result.reason === ResultReason.RecognizingSpeech) {
                 const recognizedText = e.result.text
                 // if (targetMessageRef.value) {
                 //     targetMessageRef.value.content = recognizedText
@@ -124,7 +119,7 @@ async function handleStartRecording() {
             }
         }
         speechRecognizerRef.value.recognized = async (s, e) => {
-            if (e.result.reason === speechsdk.ResultReason.RecognizedSpeech) {
+            if (e.result.reason === ResultReason.RecognizedSpeech) {
                 const resultText = e.result.text
                 const contents = await handleChatCompletions(resultText)
                 handletexttospeech(contents)
@@ -145,13 +140,13 @@ async function handleStartRecording() {
 
 async function handletexttospeech(text: string) {
     const url = new URL(import.meta.env.VITE_TEXT_TO_SPEECH_CONTAINER_URL)
-    const speechConfig = speechsdk.SpeechConfig.fromHost(url);
-    const synthesizer = new speechsdk.SpeechSynthesizer(speechConfig);
+    const speechConfig = SpeechConfig.fromHost(url);
+    const synthesizer = new SpeechSynthesizer(speechConfig);
     // 音声合成の開始
     synthesizer.speakTextAsync(
         text,
         result => {
-            if (result.reason === speechsdk.ResultReason.SynthesizingAudioCompleted) {
+            if (result.reason === ResultReason.SynthesizingAudioCompleted) {
                 console.log('音声合成完了')
             } else {
 
@@ -200,7 +195,7 @@ async function handleStopRecording() {
 .div-2 {
     display: flex;
     flex-direction: column;
-    flex-grow:1;
+    flex-grow: 1;
 }
 
 .div-3 {
@@ -264,7 +259,7 @@ async function handleStopRecording() {
     outline: none;
 }
 
-.textarea-2{
+.textarea-2 {
     width: 100%;
 
 }

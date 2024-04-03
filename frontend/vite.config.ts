@@ -1,13 +1,14 @@
 import { fileURLToPath, URL } from 'node:url'
-
-import { defineConfig } from 'vite'
+import { resolve } from 'path'
+import { defineConfig, splitVendorChunkPlugin } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
 const path = require("path");
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    vue()
+    vue(),
+    splitVendorChunkPlugin()
   ],
   resolve: {
     alias: {
@@ -17,5 +18,17 @@ export default defineConfig({
   server: {
     host: true
   },
-  assetsInclude: ['**/*.mov']
+  assetsInclude: ['**/*.mov'],
+  build: {
+    chunkSizeWarningLimit: 2000,
+    rollupOptions: {
+      output: {
+        manualChunks(id: string) {
+          if (id.includes('microsoft-cognitiveservices-speech-sdk')) {
+            return 'microsoft-cognitiveservices-speech-sdk';
+          }
+        },
+      },
+    },
+  },
 })
