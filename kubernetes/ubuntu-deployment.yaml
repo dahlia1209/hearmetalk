@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ubuntu-xfce-desktop
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ubuntu-xfce-desktop
+  template:
+    metadata:
+      labels:
+        app: ubuntu-xfce-desktop
+    spec:
+      containers:
+      - name: ubuntu-xfce
+        image: linuxserver/rdesktop:amd64-ubuntu-xfce
+        ports:
+        - containerPort: 3389
+        env:
+        - name: PUID
+          value: "1000"
+        - name: PGID
+          value: "1000"
+        - name: TZkubectl
+          value: "Asia/Tokyo"
+        - name: SUDO_PASSWORD
+          value: "RLpjR)&t|F6K"
+        - name: GUI
+          value: "TRUE"
+        - name: SOUND
+          value: "TRUE" 

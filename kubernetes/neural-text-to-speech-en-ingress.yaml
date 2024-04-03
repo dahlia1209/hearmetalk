@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: text-to-speech-en-ingress
+  annotations: 
+    kubernetes.azure.com/tls-cert-keyvault-uri: https://nakamura-kv.vault.azure.net/certificates/wildhearmetalkCA/feb4f1db6f4e4a9a88523ae96c007a64
+    nginx.ingress.kubernetes.io/whitelist-source-range: 126.117.183.184/32,10.244.0.17/32
+spec:
+  ingressClassName: webapprouting.kubernetes.azure.com
+  rules:
+    - host: text-to-speech-en.hearmetalk.net
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: neural-text-to-speech-en
+                port:
+                  number: 80
+  tls:
+  - hosts:
+    - text-to-speech-en.hearmetalk.net 
+    secretName: keyvault-text-to-speech-en-ingress
