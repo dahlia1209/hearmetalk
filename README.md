@@ -23,62 +23,12 @@ npm run serve
 npm run lint
 ```
 ## Backend Project setup
-
-## Resources
-
-### GitHub
-https://github.com/dahlia1209/hearmetalk.git
-
-### tamaranbai
-
-### Web Site
-https://ashy-mushroom-062ed5b10.4.azurestaticapps.net/
-
-### API endpoint
-https://nakamura-app-01.azurewebsites.net/
-
-
-### リソース構築メモ
-#### リソース作成・デプロイ
-(az login)
-az group create --name nakamura-rg-99 --location "Japan East" 
-cd C:\src\hearmetalk\backend
-az webapp up -g nakamura-rg-99 -n nakamura-app-01 -p appserviceplan-nakamura-app-01 --runtime PYTHON:3.11 --sku B1
-cd C:\src\hearmetalk\resources
-az deployment group create --resource-group "nakamura-rg-99" --template-file ".\backend.bicep"
-
-#### リソース削除
-az group delete -n nakamura-rg-99 -y
-
-#### 再デプロイ
-az webapp up -g nakamura-rg-99 -n nakamura-app-01 -p appserviceplan-nakamura-app-01 --runtime PYTHON:3.11 --sku B1
-az webapp restart -g nakamura-rg-99 -n nakamura-app-01
-
-#### docker 起動
-・speech to text
-docker run --rm -it -p 5000:5000 --memory 8g --cpus 4 `
-mcr.microsoft.com/azure-cognitive-services/speechservices/speech-to-text:4.5.0-amd64-ja-jp `
-Eula=accept `
-Billing=https://eastus.api.cognitive.microsoft.com/ `
-ApiKey={apikey}
-
-・text to speech
-docker run --rm -it -p 5001:5000 --memory 12g --cpus 6 `
-mcr.microsoft.com/azure-cognitive-services/speechservices/neural-text-to-speech:3.1.0-amd64-ja-jp-nanamineural `
-Eula=accept `
-Billing=https://eastus.api.cognitive.microsoft.com/ `
-ApiKey={API_KEY}
-
-#### speechToText app service作成
-az group create --name nakamura-rg-99 --location "eastus" 
-cd C:\src\hearmetalk\resources\speechToText
-az deployment group create --resource-group "nakamura-rg-99" --template-file ".\app.bicep"
-
-#### OpenAIContainer作成
+### OpenAIContainer作成
 cd C:\src\hearmetalk\backend-fastapi\  
 az acr build --resource-group nakamura-rg --registry nakamuraacr --image openaicompletions:latest .
 
-#### AKS作成
+## Resources
+### AKS作成
 az network dns record-set a delete --resource-group nakamura-rg --zone-name hearmetalk.net --name chat --yes
 az network dns record-set a delete --resource-group nakamura-rg --zone-name hearmetalk.net --name speech-to-text  --yes
 az network dns record-set a delete --resource-group nakamura-rg --zone-name hearmetalk.net --name text-to-speech --yes
@@ -137,11 +87,20 @@ sudo apt install /config/google-chrome-stable_current_amd64.deb -y
 ■削除
 az group delete -n nakamura-rg-aks -y
 
+## プッシュ前にやること
+・シークレットのスキャン
+docker pull zricethezav/gitleaks:latest
+docker run -v  C:\src\hearmetalk:/path zricethezav/gitleaks:latest detect  --source="/path" 
 
-### Tips
-#### 証明書
+## Tips
+### 証明書
 https://www.ipentec.com/document/windows-iis-ssl-wild-card-domain-certificate-using-win-acme
 
-cd C:\src\hearmetalk\backend-oauth2
+cd C:\src\hearmetalk\backend-fastapi
 venv\Scripts\activate    
 uvicorn main:app --reload
+
+### GitHub
+https://github.com/dahlia1209/hearmetalk.git
+
+### tamaranbai

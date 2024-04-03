@@ -19,3 +19,20 @@ spec:
         image: nakamuraacr.azurecr.io/openaicompletions:latest
         ports: 
           - containerPort: 3100
+        env:
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: azure-nakamura-kv
+              key: OPENAI-API-KEY
+        volumeMounts:
+        - name: secrets-store01-inline
+          mountPath: "/mnt/secrets-store"
+          readOnly: true
+      volumes:
+        - name: secrets-store01-inline
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: "azure-nakamura-kv"

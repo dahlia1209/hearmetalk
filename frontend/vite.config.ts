@@ -21,14 +21,5 @@ export default defineConfig({
   assetsInclude: ['**/*.mov'],
   build: {
     chunkSizeWarningLimit: 2000,
-    rollupOptions: {
-      output: {
-        manualChunks(id: string) {
-          if (id.includes('microsoft-cognitiveservices-speech-sdk')) {
-            return 'microsoft-cognitiveservices-speech-sdk';
-          }
-        },
-      },
-    },
   },
 })
