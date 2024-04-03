@@ -1,13 +1,13 @@
-import * as speechsdk from "microsoft-cognitiveservices-speech-sdk"
+import {SpeechSynthesizer,SpeechSynthesisResult,ResultReason} from "microsoft-cognitiveservices-speech-sdk"
 import { TextAnalysisClient, AzureKeyCredential } from "@azure/ai-language-text"
 
-export async function textToSpeech(speechSynthesizer: speechsdk.SpeechSynthesizer, text: string): Promise<speechsdk.SpeechSynthesisResult> {
+export async function textToSpeech(speechSynthesizer: SpeechSynthesizer, text: string): Promise<SpeechSynthesisResult> {
     return new Promise((resolve, reject) => {
         if (speechSynthesizer) {
             speechSynthesizer.speakTextAsync(
                 text,
                 result => {
-                    if (result.reason === speechsdk.ResultReason.SynthesizingAudioCompleted) {
+                    if (result.reason === ResultReason.SynthesizingAudioCompleted) {
                         speechSynthesizer.close();
                         resolve(result);
                     } else {
