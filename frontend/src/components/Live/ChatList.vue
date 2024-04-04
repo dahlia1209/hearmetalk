@@ -14,16 +14,8 @@
                 </div>
                 <!-- 他のチャットメッセージを追加 -->
             </div>
-            <!-- <div class="div-3">
-                <textarea class="div-5" placeholder="チャット..." v-model="messageContent"></textarea>
-                <div class="div-6" @click="messageContent === '' ? '' : handleReplying(messageContent)"><img
-                        src="@/assets/submit.svg" alt=""></div>
-            </div> -->
-            <button class="div-6"
-                @click="handleGetAccessToken(); startReadMessageProcess(5000)">startReadMessageProcess</button>
+            <button class="div-6" @click="startReadMessageProcess(5000)">startReadMessageProcess</button>
             <button class="div-6" @click="stopReadMessageProcess">stopReadMessageProcess</button>
-            <button class="div-6" @click="">detectLanguage</button>
-
         </div>
     </div>
 </template>
@@ -31,7 +23,7 @@
 import { onMounted, ref, onUnmounted, watch } from 'vue';
 import * as chatModel from "@/models/Chat"
 import * as chatServices from "@/services/chatServices"
-import {SpeechConfig,SpeechSynthesizer,SpeakerAudioDestination,AudioConfig} from "microsoft-cognitiveservices-speech-sdk"
+import { SpeechConfig, SpeechSynthesizer, SpeakerAudioDestination, AudioConfig } from "microsoft-cognitiveservices-speech-sdk"
 import * as liveServices from "@/services/liveServices"
 import * as oauthServices from "@/services/oauthServices"
 import * as speechServices from "@/services/speechServices"
@@ -50,7 +42,8 @@ const processedMessageIdsRef = ref(new Set())
 const isReadingMessageRef = ref(false)
 const tokenRef = ref<LiveModel.Token>({ access_token: null, expired_time: undefined, expires_in: null })
 const liveChatIdRef = ref<undefined | string>(undefined)
-const div2Ref=ref<null|HTMLDivElement>(null)
+const div2Ref = ref<null | HTMLDivElement>(null)
+const accessTokenStateRef = ref<"unverified"|"verified"|"verifying">("unverified")
 
 // watch(isSpeaking, () => {
 //     if (!isSpeaking.value) {
@@ -73,8 +66,23 @@ onUnmounted(() => {
 })
 
 function startReadMessageProcess(ms: number) {
-    processRef.value = setInterval(() => {
-        responseMessage()
+    processRef.value = setInterval(async () => {
+        if(!tokenRef.value.access_token || !tokenRef.value.expired_time || tokenRef.value.expired_time < new Date()){
+            accessTokenStateRef.value==="unverified"
+        }
+        if(accessTokenStateRef.value==="verified"){
+            responseMessage()
+        }
+        else if (accessTokenStateRef.value==="unverified") {
+            accessTokenStateRef.value = "verifying"
+            tokenRef.value = await waitForGetAccessToken()
+            responseMessage()
+            accessTokenStateRef.value = "verified"
+            return
+        }
+        else if(accessTokenStateRef.value==="verifying"){
+            return
+        }
     }, ms);
     console.log("読み上げを開始します。")
     return processRef.value
@@ -86,18 +94,10 @@ function stopReadMessageProcess() {
     console.log("読み上げを停止します。")
 }
 
-async function handleGetAccessToken() {
-    if (!tokenRef.value.access_token || !tokenRef.value.expired_time || tokenRef.value.expired_time < new Date()) {
-        tokenRef.value = await waitForGetAccessToken()
-    }
-    return true;
-}
-
 const responseMessage = async () => {
     if (isReadingMessageRef.value || isSpeakingRef.value) {
         return;
     }
-    handleGetAccessToken()
     if (!liveChatIdRef.value && tokenRef.value.access_token) {
         liveChatIdRef.value = await liveServices.getLiveChatId(tokenRef.value.access_token)
     }
@@ -113,13 +113,14 @@ const responseMessage = async () => {
                         const authorId = LiveChatMessage.authorDetails.channelId
                         addMessageToChat(message, "user", LiveChatMessage.authorDetails.displayName, authorId)
                         scrollToBottom()
-                        const language = await detectLanguage(message)
-                        const response = language === "en" || language === "ja" ? await chatCompletions(message, authorId) : "Sorry, we only support Japanese or English."
-                        replyContent.value=response
-                        const speechSynthesizer = language === undefined ? initSpeechSynthesizer("en") : initSpeechSynthesizer(language)
+                        // const language = await detectLanguage(message)
+                        // const response = language === "en" || language === "ja" ? await chatCompletions(message, authorId) : "Sorry, we only support Japanese or English."
+                        let response = await chatCompletions(message, authorId)
+                        const language = await detectLanguage(response)
+                        response = language === "en" || language === "ja" ? response : "Sorry, we only support Japanese or English."
+                        replyContent.value = response
+                        const speechSynthesizer = language === "en" || language === "ja" ? initSpeechSynthesizer(language) : initSpeechSynthesizer("en")
                         isSpeakingRef.value = true
-                        console.log(speechSynthesizer)
-                        console.log("response",response)
                         speechServices.textToSpeech(speechSynthesizer, response)
                         processedMessageIdsRef.value.add(LiveChatMessage.id);
                         await waitForSpeechSynthesizerToClose()
@@ -155,7 +156,7 @@ function waitForGetAccessToken() {
         const checkClose = setInterval(() => {
             const accessToken = localStorage.getItem('access_token')
             const expiresIn = Number(localStorage.getItem('expires_in'))
-            if (accessToken && expiresIn) {
+            if (accessToken && expiresIn !== 0) {
                 clearInterval(checkClose);
                 const expiredTime = new Date(new Date().getTime() + expiresIn * 1000);
                 const token: LiveModel.Token = { access_token: accessToken, expired_time: expiredTime, expires_in: expiresIn }
@@ -211,9 +212,9 @@ function addMessageToChat(content: string, role: "user" | "assistant" | "system"
     return message
 }
 
-function scrollToBottom(){
-    if(div2Ref.value){
-        div2Ref.value.scrollTop=div2Ref.value.scrollHeight;
+function scrollToBottom() {
+    if (div2Ref.value) {
+        div2Ref.value.scrollTop = div2Ref.value.scrollHeight;
     }
 }
 
@@ -282,8 +283,10 @@ async function chatCompletions(text: string, authorId: chatModel.Message["author
 </script>
 <style scoped>
 .chat-list-area {
+    margin-right: 30px;
     display: flex;
     flex-direction: row;
+    width: 100%;
 }
 
 
@@ -339,14 +342,13 @@ async function chatCompletions(text: string, authorId: chatModel.Message["author
     display: flex;
     flex-direction: column;
     ;
-    width: 500px;
+    flex: 1;
 }
 
 .div-8 {
     background-color: #ffffff;
-
-    width: 300px;
-    height: 300px;
+    width: 400px;
+    height: 400px;
     margin: 20px auto;
     position: relative;
     overflow: hidden;
@@ -359,6 +361,6 @@ async function chatCompletions(text: string, authorId: chatModel.Message["author
 .div-9 {
     display: flex;
     flex-direction: column;
-    width: 500px;
+    flex: 2;
 }
 </style>
