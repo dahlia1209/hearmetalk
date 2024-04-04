@@ -4,7 +4,7 @@ metadata:
   name: openaicompletions-ingress
   annotations: 
     kubernetes.azure.com/tls-cert-keyvault-uri: https://nakamura-kv.vault.azure.net/certificates/wildhearmetalkCA/feb4f1db6f4e4a9a88523ae96c007a64
-    nginx.ingress.kubernetes.io/whitelist-source-range: 126.117.183.184/32,External IP has not been assigned yet. Retrying... Attempt #1 failed: IP not assigned yet External IP has not been assigned yet. Retrying... Attempt #2 failed: IP not assigned yet 10.244.0.17/32
+    nginx.ingress.kubernetes.io/whitelist-source-range: 126.117.183.184/32,10.244.0.17/32
 spec:
   ingressClassName: webapprouting.kubernetes.azure.com
   rules:

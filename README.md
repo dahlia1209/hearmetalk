@@ -27,8 +27,14 @@ npm run lint
 cd C:\src\hearmetalk\backend-fastapi\  
 az acr build --resource-group nakamura-rg --registry nakamuraacr --image openaicompletions:latest .
 
+### ローカルサーバ起動コマンド
+cd C:\src\hearmetalk\backend-fastapi
+venv\Scripts\activate    
+uvicorn main:app --reload
+
 ## Resources
 ### AKS作成
+```
 az network dns record-set a delete --resource-group nakamura-rg --zone-name hearmetalk.net --name chat --yes
 az network dns record-set a delete --resource-group nakamura-rg --zone-name hearmetalk.net --name speech-to-text  --yes
 az network dns record-set a delete --resource-group nakamura-rg --zone-name hearmetalk.net --name text-to-speech --yes
@@ -76,29 +82,29 @@ az aks update -g nakamura-rg-aks -n nakamura-aks --enable-aad --aad-admin-group-
 kubectl get deployment
 kubectl get service
 kubectl get ingress
-
+```
 ■Ubuntuのコマンド
+```
 sudo apt-get -y update
 sudo apt install -y obs-studio ffmpeg v4l2loopback-dkms language-pack-ja fonts-ipafont fonts-ipaexfont wget
 fc-cache -fv 
 wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 sudo apt install /config/google-chrome-stable_current_amd64.deb -y
-
+```
 ■削除
+```
 az group delete -n nakamura-rg-aks -y
+```
 
 ## プッシュ前にやること
 ・シークレットのスキャン
+```
 docker pull zricethezav/gitleaks:latest
 docker run -v  C:\src\hearmetalk:/path zricethezav/gitleaks:latest detect  --source="/path" 
-
+```
 ## Tips
 ### 証明書
 https://www.ipentec.com/document/windows-iis-ssl-wild-card-domain-certificate-using-win-acme
-
-cd C:\src\hearmetalk\backend-fastapi
-venv\Scripts\activate    
-uvicorn main:app --reload
 
 ### GitHub
 https://github.com/dahlia1209/hearmetalk.git
