@@ -43,7 +43,7 @@ const isReadingMessageRef = ref(false)
 const tokenRef = ref<LiveModel.Token>({ access_token: null, expired_time: undefined, expires_in: null })
 const liveChatIdRef = ref<undefined | string>(undefined)
 const div2Ref = ref<null | HTMLDivElement>(null)
-const accessTokenStateRef = ref<"unverified"|"verified"|"verifying">("unverified")
+const accessTokenStateRef = ref<"unverified" | "verified" | "verifying">("unverified")
 
 // watch(isSpeaking, () => {
 //     if (!isSpeaking.value) {
@@ -66,22 +66,24 @@ onUnmounted(() => {
 })
 
 function startReadMessageProcess(ms: number) {
-    processRef.value = setInterval(async () => {
-        if(!tokenRef.value.access_token || !tokenRef.value.expired_time || tokenRef.value.expired_time < new Date()){
-            accessTokenStateRef.value==="unverified"
+    processRef.value = setInterval(() => {
+        if (!accessTokenStateRef.value || !tokenRef.value.expired_time || (accessTokenStateRef.value === "verified" && tokenRef.value.expired_time < new Date)) {
+            accessTokenStateRef.value = "unverified";
         }
-        if(accessTokenStateRef.value==="verified"){
-            responseMessage()
+        if (accessTokenStateRef.value === "verified") {
+            responseMessage();
         }
-        else if (accessTokenStateRef.value==="unverified") {
-            accessTokenStateRef.value = "verifying"
-            tokenRef.value = await waitForGetAccessToken()
-            responseMessage()
-            accessTokenStateRef.value = "verified"
-            return
+        else if (accessTokenStateRef.value === "unverified") {
+            accessTokenStateRef.value = "verifying";
+            waitForGetAccessToken().then((newToken) => {
+                tokenRef.value = newToken;
+                accessTokenStateRef.value = "verified";
+                responseMessage();
+            });
+            return;
         }
-        else if(accessTokenStateRef.value==="verifying"){
-            return
+        else if (accessTokenStateRef.value === "verifying") {
+            return;
         }
     }, ms);
     console.log("読み上げを開始します。")
