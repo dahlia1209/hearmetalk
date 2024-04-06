@@ -1,9 +1,9 @@
 <template>
     <div class="div-1" ref="div1">
         <div class="div-2">
-            <button @click="playAudio();selectAnimation('waiting'); startReadMessageProcess(10000);">start</button>
+            <button @click="playAudio(); selectAnimation('waiting'); startReadMessageProcess(10000);">start</button>
             <!-- <button @click="playAudio();selectAnimation('waiting');">start</button> -->
-            <button @click="stopAudio();stopReadMessageProcess();">stop</button>
+            <button @click="stopAudio(); stopReadMessageProcess();">stop</button>
             <audio class="audio-1" ref="audio1Ref">
                 <source src="@/assets/maou_14_shining_star.mp3" type="audio/mp3">
                 お使いのブラウザはオーディオタグをサポートしていません。
@@ -21,15 +21,20 @@
         <div class="div-3">
             <div class="div-4">
                 <div class="div-5">
-                    コメント主： {{ commentMessageRef?.roleDisplay }}
+                    <img :src="profileImageUrlRef ? profileImageUrlRef : ''" />
+                    {{ commentMessageRef ? commentMessageRef.roleDisplay : "ここにみんなのコメントが表示されるよ！" }}
                 </div>
                 <div class="div-5">
-                    コメント文： {{ commentMessageRef?.content }}
+                    {{ commentMessageRef ? commentMessageRef.content : "" }}
                 </div>
             </div>
             <div class="div-4">
                 <div class="div-5">
-                    回答：{{ replyMessageRef?.content }}
+                    <div class="div-8">
+                        <img src="@/assets/puchitomato.png" />
+                        <div class="div-7">桃瀬ひより</div>
+                    </div>
+                    <div class="div-6">{{ replyMessageRef ? replyMessageRef.content : "ここにひよりのコメントが表示されるよ" }}</div>
                 </div>
             </div>
         </div>
@@ -66,6 +71,7 @@ const tokenRef = ref<LiveModel.Token>({ access_token: null, expired_time: undefi
 const liveChatIdRef = ref<undefined | string>(undefined)
 const div2Ref = ref<null | HTMLDivElement>(null)
 const accessTokenStateRef = ref<"unverified" | "verified" | "verifying">("unverified")
+const profileImageUrlRef = ref<null | string>(null)
 
 onMounted(() => {
     systemmessageRef.value = new chatModel.Message();
@@ -103,15 +109,15 @@ function playVideo(animation: Animation) {
     }
 }
 
-function playAudio(){
-    if(audio1Ref.value){
-        audio1Ref.value.volume=0.3
+function playAudio() {
+    if (audio1Ref.value) {
+        audio1Ref.value.volume = 0.3
         audio1Ref.value.loop = true;
         audio1Ref.value.play()
     }
 }
-function stopAudio(){
-    if(audio1Ref.value){
+function stopAudio() {
+    if (audio1Ref.value) {
         audio1Ref.value.pause()
     }
 }
@@ -184,8 +190,10 @@ const responseMessage = async () => {
             if (LiveChatMessages) {
                 for (const LiveChatMessage of LiveChatMessages) {
                     if (!processedMessageIdsRef.value.has(LiveChatMessage.id)) {
+                        console.log(LiveChatMessage)
                         const message = LiveChatMessage.snippet.textMessageDetails.messageText;
                         const authorId = LiveChatMessage.authorDetails.channelId
+                        profileImageUrlRef.value = LiveChatMessage.authorDetails.profileImageUrl
                         commentMessageRef.value = addMessageToChat(message, "user", LiveChatMessage.authorDetails.displayName, authorId)
                         let response = await chatCompletions(message, authorId)
                         const language = await detectLanguage(response)
@@ -352,7 +360,7 @@ async function chatCompletions(text: string, authorId: chatModel.Message["author
     padding: 200px 200px;
     background-color: white;
     background-clip: content-box;
-    opacity: 80%;
+    /* opacity: 80%; */
 
 
 }
@@ -360,7 +368,28 @@ async function chatCompletions(text: string, authorId: chatModel.Message["author
 .div-5 {
     padding: 8px;
     overflow: hidden;
-    /* border:dotted 5px #e2c2b3; */
+    font-style: bold;
+    display: flex;
+    flex-direction: column;
+    /* background-color: white; */
 
+}
+
+.div-5 img {
+    height: 50px;
+    opacity: 100%;
+    overflow-x: auto;
+}
+
+
+.div-8{
+    display: flex;
+    direction: row;
+    font-size: 32px;
+    font-weight: bold;
+}
+
+.div-6{
+    font-size: 32px;
 }
 </style>

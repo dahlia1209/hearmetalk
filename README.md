@@ -136,3 +136,8 @@ C:\src\hearmetalk\frontend\src\assets\hiyori_m10.webm
 「音楽：魔王魂」
 素材：
 C:\src\hearmetalk\frontend\src\assets\maou_14_shining_star.mp3
+
+クレジット表記：
+ツカッテ様
+素材：
+C:\src\hearmetalk\frontend\src\assets\puchitomato.png

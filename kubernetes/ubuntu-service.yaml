@@ -11,5 +11,5 @@ spec:
   selector:
     app: ubuntu-xfce-desktop
   loadBalancerSourceRanges:
-    - 126.247.245.2/32 #myGlobalIp
+    - 126.117.183.184/32 #myGlobalIp
     
