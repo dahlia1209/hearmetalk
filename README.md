@@ -109,4 +109,25 @@ https://www.ipentec.com/document/windows-iis-ssl-wild-card-domain-certificate-us
 ### GitHub
 https://github.com/dahlia1209/hearmetalk.git
 
+### mov→WebMファイル変換
+```
+cd C:\src\hearmetalk\frontend\src\assets
+ffmpeg -i speaking.mov -c:v libvpx-vp9 -b:v 0 -crf 30 -pix_fmt yuva420p speaking.webm 
+```
+
 ### tamaranbai
+
+## 素材提供者
+クレジット表記：
+みんちりえ（ https://min-chi.material.jp/ ）
+素材：
+C:\src\hearmetalk\frontend\src\assets\School_music_room_night_lights_ON.jpg
+C:\src\hearmetalk\frontend\src\assets\School_bench_daytime.jpg
+
+クレジット表記：
+「本作品のキャラクターには株式会社Live2Dの著作物であるサンプルデータが株式会社Live2Dの定める規約に従って用いられています。本作品は制作者の完全な自己の裁量で制作されています。」
+素材：
+C:\src\hearmetalk\frontend\src\assets\hiyori_m05.webm
+C:\src\hearmetalk\frontend\src\assets\hiyori_m08.webm
+C:\src\hearmetalk\frontend\src\assets\hiyori_m09.webm
+C:\src\hearmetalk\frontend\src\assets\hiyori_m10.webm

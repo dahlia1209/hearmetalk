@@ -72,11 +72,9 @@ function Get-UbuntuIP  {
             if (-not [string]::IsNullOrWhiteSpace($output)) {
                 return $output
             } else {
-                # Write-Output "External IP has not been assigned yet. Retrying..."
                 throw "IP not assigned yet"
             }
         } catch {
-            # Write-Output "Attempt #$($tryCount + 1) failed: $_"
             if ($tryCount -lt $maxRetries - 1) {
                 Start-Sleep -Seconds $retryInterval
             }

@@ -5,5 +5,5 @@ export interface LiveState {
 }
 
 export const liveState: LiveState = reactive({
-    currentView: "chatList"
+    currentView: "animation"
 })

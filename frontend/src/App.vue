@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts" setup>
-import Header from './views/Header.vue'
+// import Header from './views/Header.vue'
 import HeaderSp from './views/HeaderSp.vue'
 import { onBeforeMount, onMounted, onUnmounted, ref, watch } from 'vue';
 const windowsWidth=ref(0)
