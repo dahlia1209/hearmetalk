@@ -131,3 +131,8 @@ C:\src\hearmetalk\frontend\src\assets\hiyori_m05.webm
 C:\src\hearmetalk\frontend\src\assets\hiyori_m08.webm
 C:\src\hearmetalk\frontend\src\assets\hiyori_m09.webm
 C:\src\hearmetalk\frontend\src\assets\hiyori_m10.webm
+
+クレジット表記：
+「音楽：魔王魂」
+素材：
+C:\src\hearmetalk\frontend\src\assets\maou_14_shining_star.mp3

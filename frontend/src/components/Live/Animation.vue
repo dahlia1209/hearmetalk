@@ -1,9 +1,13 @@
 <template>
     <div class="div-1" ref="div1">
         <div class="div-2">
-            <button @click="selectAnimation('waiting'); startReadMessageProcess(5000);">start</button>
-            <!-- <button @click="selectAnimation('positive')">positive</button>
-            <button @click="selectAnimation('negative')">negative</button> -->
+            <button @click="playAudio();selectAnimation('waiting'); startReadMessageProcess(10000);">start</button>
+            <!-- <button @click="playAudio();selectAnimation('waiting');">start</button> -->
+            <button @click="stopAudio();stopReadMessageProcess();">stop</button>
+            <audio class="audio-1" ref="audio1Ref">
+                <source src="@/assets/maou_14_shining_star.mp3" type="audio/mp3">
+                お使いのブラウザはオーディオタグをサポートしていません。
+            </audio>
         </div>
         <video :hidden="selectedAnimationRef !== 'waiting'" ref="video1">
             <source src="@/assets/hiyori_m05.webm" type="video/webm">
@@ -46,6 +50,7 @@ import { TextAnalysisClient, AzureKeyCredential, type DetectedLanguage } from "@
 const video1 = ref<null | HTMLVideoElement>(null)
 const video2 = ref<null | HTMLVideoElement>(null)
 const video3 = ref<null | HTMLVideoElement>(null)
+const audio1Ref = ref<null | HTMLAudioElement>(null)
 type Animation = "waiting" | "positive" | "negative"
 const selectedAnimationRef = ref<Animation>("waiting")
 const replyMessageRef = ref<chatModel.Message | null>(null)
@@ -98,6 +103,19 @@ function playVideo(animation: Animation) {
     }
 }
 
+function playAudio(){
+    if(audio1Ref.value){
+        audio1Ref.value.volume=0.3
+        audio1Ref.value.loop = true;
+        audio1Ref.value.play()
+    }
+}
+function stopAudio(){
+    if(audio1Ref.value){
+        audio1Ref.value.pause()
+    }
+}
+
 async function startReadMessageProcess(ms: number) {
     try {
         await updateAccessToken()
@@ -122,7 +140,7 @@ function stopReadMessageProcess() {
 function updateAccessTokenState() {
     if (accessTokenStateRef.value === "verified" && tokenRef.value.expired_time && tokenRef.value.expired_time < new Date()) {
         accessTokenStateRef.value = "unverified"
-    } 
+    }
 }
 
 async function updateAccessToken() {
@@ -296,7 +314,7 @@ async function chatCompletions(text: string, authorId: chatModel.Message["author
     /* background-image: url('@/assets/LiveScreen01.png'); */
     display: flex;
     flex-direction: column;
-    overflow: auto;
+    overflow-y: visible;
     width: 100%;
     background-size: cover;
     background-position: center;
@@ -341,6 +359,8 @@ async function chatCompletions(text: string, authorId: chatModel.Message["author
 
 .div-5 {
     padding: 8px;
-    overflow: hidden
+    overflow: hidden;
+    /* border:dotted 5px #e2c2b3; */
+
 }
 </style>
