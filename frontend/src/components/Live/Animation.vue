@@ -118,7 +118,6 @@ function playVideo(animation: Animation) {
         video3.value.loop = true;
         video3.value.play()
     } else {
-        console.log("setTimeout(checkAndPlayVideo, 500);")
         setTimeout(playVideo, 500, animation);
     }
 }
@@ -158,9 +157,6 @@ function stopReadMessageProcess() {
 }
 
 function updateAccessTokenState() {
-    console.log("tokenRef.value.expired_time,new Date()",tokenRef.value.expired_time,new Date())
-    console.log('accessTokenStateRef.value === "verified" && tokenRef.value.expired_time && tokenRef.value.expired_time < new Date()',accessTokenStateRef.value === "verified" && tokenRef.value.expired_time && tokenRef.value.expired_time < new Date())
-
     if (accessTokenStateRef.value === "verified" && tokenRef.value.expired_time && tokenRef.value.expired_time < new Date()) {
         accessTokenStateRef.value = "unverified"
     }
@@ -208,7 +204,6 @@ const responseMessage = async () => {
             if (LiveChatMessages) {
                 for (const LiveChatMessage of LiveChatMessages) {
                     if (!processedMessageIdsRef.value.has(LiveChatMessage.id)) {
-                        console.log(LiveChatMessage)
                         const message = LiveChatMessage.snippet.textMessageDetails.messageText;
                         const authorId = LiveChatMessage.authorDetails.channelId
                         const profileImageUrl = LiveChatMessage.authorDetails.profileImageUrl
@@ -307,7 +302,6 @@ async function chatCompletions(text: string, authorId: chatModel.Message["author
             const messageDtos = systemmessageRef.value.content == "" ?
                 [...filteredMessages.map(message => message.toDto())] :
                 [systemmessageRef.value.toDto(), ...filteredMessages.map(message => message.toDto())];
-            console.log(messageDtos)
             return messageDtos;
         } else {
             const messageDtos = systemmessageRef.value.content == "" ?
