@@ -2,8 +2,8 @@
     <div class="div-1" ref="div1">
         <div class="div-2">
             <button @click="playAudio(); selectAnimation('waiting'); startReadMessageProcess(10000);">start</button>
-            <!-- <button @click="playAudio();selectAnimation('waiting');">start</button> -->
             <button @click="stopAudio(); stopReadMessageProcess();">stop</button>
+            <button @click="updateAccessToken();">updateAccessToken</button>
             <audio class="audio-1" ref="audio1Ref">
                 <source src="@/assets/maou_14_shining_star.mp3" type="audio/mp3">
                 お使いのブラウザはオーディオタグをサポートしていません。
@@ -83,9 +83,7 @@ const processedMessageIdsRef = ref(new Set())
 const isReadingMessageRef = ref(false)
 const tokenRef = ref<LiveModel.Token>({ access_token: null, expired_time: undefined, expires_in: null })
 const liveChatIdRef = ref<undefined | string>(undefined)
-const div2Ref = ref<null | HTMLDivElement>(null)
 const accessTokenStateRef = ref<"unverified" | "verified" | "verifying">("unverified")
-const profileImageUrlRef = ref<null | string>(null)
 
 onMounted(() => {
     systemmessageRef.value = new chatModel.Message();
@@ -142,6 +140,7 @@ async function startReadMessageProcess(ms: number) {
         processRef.value = setInterval(async () => {
             updateAccessTokenState();
             await updateAccessToken();
+            console.log(tokenRef.value)
             responseMessage();
         }, ms);
     } catch (error) {
