@@ -146,3 +146,9 @@ C:\src\hearmetalk\frontend\src\assets\puchitomato.png
 フタバのフリーイラスト
 素材：
 
+・【テスト】AI Vtuber 百瀬ひより
+クレジット
+・背景画像：みんちりえ
+・音楽：魔王魂
+・桃瀬ひより：Live2D
+・アイコン：フタバのフリーイラスト、ツカッテ
