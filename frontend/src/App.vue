@@ -1,14 +1,14 @@
 <template>
   <div :class="{'div-1':responsiveType==='desktop','div-2':responsiveType==='mobile'}">
-    <Header v-if="responsiveType==='desktop'" />
-    <HeaderSp v-else-if="responsiveType==='mobile'" />
+    <!-- <Header v-if="responsiveType==='desktop'" />
+    <HeaderSp v-else-if="responsiveType==='mobile'" /> -->
     <router-view />
   </div>
 </template>
 
 <script lang="ts" setup>
 // import Header from './views/Header.vue'
-import HeaderSp from './views/HeaderSp.vue'
+// import HeaderSp from './views/HeaderSp.vue'
 import { onBeforeMount, onMounted, onUnmounted, ref, watch } from 'vue';
 const windowsWidth=ref(0)
 const responsiveType=ref<'desktop'|'mobile'>('desktop')

@@ -5,13 +5,15 @@ export class Message {
     public role: "user" | "assistant" | "system";
     public roleDisplay:string;
     public authorId:string|undefined
+    public profileImageUrl:string|undefined
 
-    constructor(messageId: string = uuidv4(),  content: string = "", role: "user" | "assistant" | "system" = "user",roleDisplay="",authorId=undefined) {
+    constructor(messageId: string = uuidv4(),  content: string = "", role: "user" | "assistant" | "system" = "user",roleDisplay="",authorId=undefined,profileImageUrl=undefined) {
         this.messageId = messageId;
         this.content = content;
         this.role = role;
         this.roleDisplay=roleDisplay
         this.authorId=authorId
+        this.profileImageUrl=profileImageUrl
     }
 
     toDto(): MessageDto {

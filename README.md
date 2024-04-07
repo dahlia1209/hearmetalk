@@ -141,3 +141,8 @@ C:\src\hearmetalk\frontend\src\assets\maou_14_shining_star.mp3
 ツカッテ様
 素材：
 C:\src\hearmetalk\frontend\src\assets\puchitomato.png
+
+クレジット表記：
+フタバのフリーイラスト
+素材：
+
