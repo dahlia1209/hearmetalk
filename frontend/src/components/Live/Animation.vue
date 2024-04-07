@@ -3,7 +3,7 @@
         <div class="div-2">
             <button @click="playAudio(); selectAnimation('waiting'); startReadMessageProcess(10000);">start</button>
             <button @click="stopAudio(); stopReadMessageProcess();">stop</button>
-            <button @click="updateAccessToken();">updateAccessToken</button>
+            <button @click="accessTokenStateRef ='unverified';updateAccessToken();">updateAccessToken</button>
             <audio class="audio-1" ref="audio1Ref">
                 <source src="@/assets/maou_14_shining_star.mp3" type="audio/mp3">
                 お使いのブラウザはオーディオタグをサポートしていません。
