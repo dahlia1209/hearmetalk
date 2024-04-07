@@ -21,22 +21,35 @@
         <div class="div-3">
             <div class="div-4">
                 <div class="div-5">
-                    <img :src="profileImageUrlRef ? profileImageUrlRef : ''" />
-                    {{ commentMessageRef ? commentMessageRef.roleDisplay : "ここにみんなのコメントが表示されるよ！" }}
+                    <div class="div-8">
+                        <img :src="commentMessageRef ? commentMessageRef.profileImageUrl : cat" />
+                        <div class="div-12">
+                            <div class="div-11">
+                                <div class="div-13"></div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="div-10">
+                        <div class="div-7">{{ commentMessageRef ? commentMessageRef.roleDisplay : "名無し" }}</div>
+                        <div class="div-6">{{ commentMessageRef ? commentMessageRef.content : "ここにみんなのコメントが表示されるよ！" }}
+                        </div>
+                    </div>
                 </div>
-                <div class="div-5">
-                    {{ commentMessageRef ? commentMessageRef.content : "" }}
-                </div>
-            </div>
-            <div class="div-4">
+
                 <div class="div-5">
                     <div class="div-8">
                         <img src="@/assets/puchitomato.png" />
-                        <div class="div-7">桃瀬ひより</div>
                     </div>
-                    <div class="div-6">{{ replyMessageRef ? replyMessageRef.content : "ここにひよりのコメントが表示されるよ" }}</div>
+                    <div class="div-10">
+                        <div class="div-7">桃瀬ひより</div>
+                        <div class="div-6">{{ replyMessageRef ? replyMessageRef.content : "ここにひよりのリプが表示されるよ！" }}</div>
+                    </div>
                 </div>
+
             </div>
+            <!-- <div class="div-4">
+            </div> -->
         </div>
     </div>
 </template>
@@ -51,6 +64,7 @@ import * as oauthServices from "@/services/oauthServices"
 import * as speechServices from "@/services/speechServices"
 import * as LiveModel from "@/models/Live"
 import { TextAnalysisClient, AzureKeyCredential, type DetectedLanguage } from "@azure/ai-language-text"
+import cat from "@/assets/cat_illust.png"
 
 const video1 = ref<null | HTMLVideoElement>(null)
 const video2 = ref<null | HTMLVideoElement>(null)
@@ -144,6 +158,9 @@ function stopReadMessageProcess() {
 }
 
 function updateAccessTokenState() {
+    console.log("tokenRef.value.expired_time,new Date()",tokenRef.value.expired_time,new Date())
+    console.log('accessTokenStateRef.value === "verified" && tokenRef.value.expired_time && tokenRef.value.expired_time < new Date()',accessTokenStateRef.value === "verified" && tokenRef.value.expired_time && tokenRef.value.expired_time < new Date())
+
     if (accessTokenStateRef.value === "verified" && tokenRef.value.expired_time && tokenRef.value.expired_time < new Date()) {
         accessTokenStateRef.value = "unverified"
     }
@@ -161,7 +178,8 @@ async function updateAccessToken() {
             const accessToken = localStorage.getItem('access_token');
             const expiresIn = Number(localStorage.getItem('expires_in'));
             if (accessToken && expiresIn !== 0) {
-                const expiredTime = new Date(new Date().getTime() + expiresIn * 1000);
+                const expiredTime = new Date(new Date().getTime() + (expiresIn-10) * 1000);
+                // const expiredTime = new Date(new Date().getTime() + 60 * 1000);
                 const token = {
                     access_token: accessToken,
                     expired_time: expiredTime,
@@ -193,8 +211,8 @@ const responseMessage = async () => {
                         console.log(LiveChatMessage)
                         const message = LiveChatMessage.snippet.textMessageDetails.messageText;
                         const authorId = LiveChatMessage.authorDetails.channelId
-                        profileImageUrlRef.value = LiveChatMessage.authorDetails.profileImageUrl
-                        commentMessageRef.value = addMessageToChat(message, "user", LiveChatMessage.authorDetails.displayName, authorId)
+                        const profileImageUrl = LiveChatMessage.authorDetails.profileImageUrl
+                        commentMessageRef.value = addMessageToChat(message, "user", LiveChatMessage.authorDetails.displayName, authorId, profileImageUrl)
                         let response = await chatCompletions(message, authorId)
                         const language = await detectLanguage(response)
                         response = language === "en" || language === "ja" ? response : "Sorry, we only support Japanese or English."
@@ -249,13 +267,16 @@ function waitForSpeechSynthesizerToClose() {
 }
 
 
-function addMessageToChat(content: string, role: "user" | "assistant" | "system", roleDisplay: string, authorId: chatModel.Message["authorId"] = undefined): chatModel.Message {
+function addMessageToChat(content: string, role: "user" | "assistant" | "system", roleDisplay: string, authorId: chatModel.Message["authorId"] = undefined, profileImageUrl: chatModel.Message["profileImageUrl"] = undefined): chatModel.Message {
     const message = new chatModel.Message();
     message.content = content;
     message.role = role;
     message.roleDisplay = roleDisplay;
     if (authorId) {
         message.authorId = authorId
+    }
+    if (profileImageUrl) {
+        message.profileImageUrl = profileImageUrl
     }
     messages.value.push(message);
     return message
@@ -358,8 +379,6 @@ async function chatCompletions(text: string, authorId: chatModel.Message["author
     flex-direction: column;
     flex: 1;
     padding: 200px 200px;
-    background-color: white;
-    background-clip: content-box;
     /* opacity: 80%; */
 
 
@@ -370,7 +389,9 @@ async function chatCompletions(text: string, authorId: chatModel.Message["author
     overflow: hidden;
     font-style: bold;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    background-color: white;
+    width: 100%;
     /* background-color: white; */
 
 }
@@ -378,18 +399,54 @@ async function chatCompletions(text: string, authorId: chatModel.Message["author
 .div-5 img {
     height: 50px;
     opacity: 100%;
-    overflow-x: auto;
+    /* overflow: auto; */
 }
 
 
-.div-8{
+.div-8 {
     display: flex;
-    direction: row;
+    flex-direction: column;
     font-size: 32px;
     font-weight: bold;
 }
 
-.div-6{
+.div-6 {
+    font-size: 24px;
+}
+
+.div-7 {
     font-size: 32px;
+    font-weight: bold;
+}
+
+.div-9 {
+    display: flex;
+    direction: row;
+}
+
+.div-10 {
+    display: flex;
+    flex-direction: column;
+}
+
+.div-11 {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 100%;
+    width: 3px;
+    padding: 4px 0px;
+    /* background-color: grey; */
+}
+
+.div-12 {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.div-13{
+    height: 100%;
+  background-color: grey; /* 線の色、ここを変更する */
 }
 </style>
