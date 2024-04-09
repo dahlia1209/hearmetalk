@@ -44,7 +44,7 @@ az network dns record-set txt delete --resource-group nakamura-rg --zone-name he
 az network dns record-set txt delete --resource-group nakamura-rg --zone-name hearmetalk.net --name text-to-speech --yes
 az network dns record-set txt delete --resource-group nakamura-rg --zone-name hearmetalk.net --name text-to-speech-en --yes
 az group create --name nakamura-rg-aks --location "japaneast" 
-az aks create --resource-group nakamura-rg-aks --name nakamura-aks  --generate-ssh-keys --attach-acr nakamuraacr  --node-vm-size Standard_B8s_v2 --enable-cluster-autoscaler --min-count 1 --max-count 20 --enable-addons monitoring --enable-app-routing  --node-count 1 --enable-aad --aad-admin-group-object-ids 167cbd1d-f736-4590-9154-6c899fb2311d
+az aks create --resource-group nakamura-rg-aks --name nakamura-aks  --generate-ssh-keys --attach-acr nakamuraacr  --node-vm-size Standard_B8s_v2 --enable-cluster-autoscaler --min-count 1 --max-count 20 --enable-addons monitoring --enable-app-routing  --node-count 2 --enable-aad --aad-admin-group-object-ids 167cbd1d-f736-4590-9154-6c899fb2311d
 az aks get-credentials --resource-group nakamura-rg-aks --name nakamura-aks --overwrite-existing
 $ZONEID=$(az network dns zone show -g nakamura-rg -n hearmetalk.net --query "id" --output tsv)
 az aks approuting zone add -g nakamura-rg-aks -n nakamura-aks --ids=$ZONEID --attach-zones
@@ -146,9 +146,21 @@ C:\src\hearmetalk\frontend\src\assets\puchitomato.png
 フタバのフリーイラスト
 素材：
 
-・【テスト】AI Vtuber 百瀬ひより
+・【テスト】AI Vtuber 桃瀬ひより /[Test] AI Vtuber Hiyori Momose (English OK)
+AI Vtuberのテスト配信です。
+コメントするとボイス付きで返信します。
+オペレーターのようなボイスですが今後改善します。
+改善要望はコメントでお願いします。
+
+This is a test delivery of AI Vtuber.
+If you comment, we will reply with voice.
+The voice sounds like an operator, but will be improved in the future.
+Please leave your improvement requests in the comments.
+
+----------------------------------------
 クレジット
 ・背景画像：みんちりえ
 ・音楽：魔王魂
-・桃瀬ひより：Live2D
+・キャラクター：東北ずん子・ずんだもんショップ【公式】（ずんだもん）
+・VOICEVOX:ずんだもん
 ・アイコン：フタバのフリーイラスト、ツカッテ

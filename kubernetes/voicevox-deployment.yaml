@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: voicevox-deployment
+  labels:
+    app: voicevox
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: voicevox
+  template:
+    metadata:
+      labels:
+        app: voicevox
+    spec:
+      containers:
+      - name: voicevox
+        image: voicevox/voicevox_engine:cpu-ubuntu20.04-latest
+        command: ["/entrypoint.sh"]
+        args: ["gosu", "user", "/opt/python/bin/python3", "./run.py", "--voicelib_dir", "/opt/voicevox_core/", "--runtime_dir", "/opt/onnxruntime/lib", "--host", "0.0.0.0","--cors_policy_mode", "all"]
+        ports: 
+          - containerPort: 50021
+        # resources:
+        #   requests:
+        #     cpu: "6" 
+        #     memory: "12Gi"
+        #   limits:
+        #     cpu: "6" 
+        #     memory: "12Gi" 
+        # env:
+        # - name: cors_policy_mode
+        #   value: "accept"
+        # - name: Billing
+        #   value: "https://eastus.api.cognitive.microsoft.com/"
+        # - name: ApiKey
+        #   valueFrom:
+        #     secretKeyRef:
+        #       name: azure-nakamura-kv
+        #       key: AZURE-SPEECHSERVICES-APIKEY
+      #   volumeMounts:
+      #   - name: secrets-store01-inline
+      #     mountPath: "/mnt/secrets-store"
+      #     readOnly: true
+      # volumes:
+      #   - name: secrets-store01-inline
+      #     csi:
+      #       driver: secrets-store.csi.k8s.io
+      #       readOnly: true
+      #       volumeAttributes:
+      #         secretProviderClass: "azure-nakamura-kv"

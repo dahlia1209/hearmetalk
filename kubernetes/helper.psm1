@@ -17,7 +17,7 @@ function replaceAksClientId {
 
 function replaceIngressWhitelistIp{
     # ファイルパス
-    $filePathList = ("C:\src\hearmetalk\kubernetes\neural-text-to-speech-en-ingress.yaml","C:\src\hearmetalk\kubernetes\neural-text-to-speech-ingress.yaml","C:\src\hearmetalk\kubernetes\openaicompletions-ingress.yaml","C:\src\hearmetalk\kubernetes\speech-to-text-ingress.yaml")
+    $filePathList = ("C:\src\hearmetalk\kubernetes\neural-text-to-speech-en-ingress.yaml","C:\src\hearmetalk\kubernetes\neural-text-to-speech-ingress.yaml","C:\src\hearmetalk\kubernetes\openaicompletions-ingress.yaml","C:\src\hearmetalk\kubernetes\speech-to-text-ingress.yaml","C:\src\hearmetalk\kubernetes\voicevox-ingress.yaml")
     $myGlobalIp=(ConvertFrom-Json (Invoke-WebRequest httpbin.org/ip).content).origin
     $ubuntuIp=Get-UbuntuIP
 
