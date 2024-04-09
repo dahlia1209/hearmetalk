@@ -3,14 +3,15 @@
         <div class="div-2">
             <button @click="playAudio(); selectAnimation('waiting'); startReadMessageProcess(10000);">start</button>
             <button @click="stopAudio(); stopReadMessageProcess();">stop</button>
-            <button @click="accessTokenStateRef ='unverified';updateAccessToken();">updateAccessToken</button>
+            <button @click="accessTokenStateRef = 'unverified'; updateAccessToken();">updateAccessToken</button>
+            <button @click="handleVoicevoxAudioPlay('ずんだもんなのだ');">voicevox</button>
             <audio class="audio-1" ref="audio1Ref">
                 <source src="@/assets/maou_14_shining_star.mp3" type="audio/mp3">
                 お使いのブラウザはオーディオタグをサポートしていません。
             </audio>
         </div>
         <video :hidden="selectedAnimationRef !== 'waiting'" ref="video1">
-            <source src="@/assets/hiyori_m05.webm" type="video/webm">
+            <source src="@/assets/zundamon_moving.webm" type="video/webm">
         </video>
         <video :hidden="selectedAnimationRef !== 'negative'" ref="video2">
             <source src="@/assets/hiyori_m10.webm" type="video/webm">
@@ -42,8 +43,10 @@
                         <img src="@/assets/puchitomato.png" />
                     </div>
                     <div class="div-10">
-                        <div class="div-7">桃瀬ひより</div>
-                        <div class="div-6">{{ replyMessageRef ? replyMessageRef.content : "ここにひよりのリプが表示されるよ！" }}</div>
+                        <div class="div-7">ずんだもん</div>
+                        <div class="div-6">{{ replyMessageRef ? replyMessageRef.content : "ここにずんだもんのリプが表示されるよ！" }}</div>
+                        <!-- <div class="div-7">桃瀬ひより</div>
+                        <div class="div-6">{{ replyMessageRef ? replyMessageRef.content : "ここにひよりのリプが表示されるよ！" }}</div> -->
                     </div>
                 </div>
 
@@ -66,6 +69,7 @@ import * as LiveModel from "@/models/Live"
 import { TextAnalysisClient, AzureKeyCredential, type DetectedLanguage } from "@azure/ai-language-text"
 import cat from "@/assets/cat_illust.png"
 
+
 const video1 = ref<null | HTMLVideoElement>(null)
 const video2 = ref<null | HTMLVideoElement>(null)
 const video3 = ref<null | HTMLVideoElement>(null)
@@ -84,12 +88,15 @@ const isReadingMessageRef = ref(false)
 const tokenRef = ref<LiveModel.Token>({ access_token: null, expired_time: undefined, expires_in: null })
 const liveChatIdRef = ref<undefined | string>(undefined)
 const accessTokenStateRef = ref<"unverified" | "verified" | "verifying">("unverified")
+const roleDisplayName="ずんだもん"
 
 onMounted(() => {
     systemmessageRef.value = new chatModel.Message();
-    systemmessageRef.value.content = "You are a friend named 'ひより,Hiyori'. You reply with the content of daily conversation. You are available in Japanese and English only. If you are asked a question in Japanese, you will respond in Japanese; if you are asked a question in English, you will respond in English."
+    systemmessageRef.value.content = "You are a friend named 'ずんだもん,Zundamon'. You reply with the content of daily conversation. You are available in Japanese and English only. If you are asked a question in Japanese, you will respond in Japanese; if you are asked a question in English, you will respond in English.When answering in Japanese, add 'もんだ' at the end of the word."
+    // systemmessageRef.value.content = "You are a friend named 'ひより,Hiyori'. You reply with the content of daily conversation. You are available in Japanese and English only. If you are asked a question in Japanese, you will respond in Japanese; if you are asked a question in English, you will respond in English."
     systemmessageRef.value.role = "system"
-    systemmessageRef.value.roleDisplay = "ひより"
+    systemmessageRef.value.roleDisplay = roleDisplayName
+
 })
 
 onUnmounted(() => {
@@ -98,6 +105,18 @@ onUnmounted(() => {
     }
     stopReadMessageProcess()
 })
+
+async function handleVoicevoxAudioPlay(text: string, speakerId: number = 1) {
+    const soundRowResponse=await liveServices.synthesisVoicevox(text,speakerId)
+    const audioBlob = await soundRowResponse.blob();
+    const audioUrl = URL.createObjectURL(audioBlob);
+    const audio = new Audio(audioUrl); 
+    audio.addEventListener('ended', function() {
+        // console.log('音声の再生が終了しました！');
+        isSpeakingRef.value=false
+    });
+    audio.play();
+}
 
 
 function selectAnimation(animation: Animation) {
@@ -122,7 +141,7 @@ function playVideo(animation: Animation) {
 
 function playAudio() {
     if (audio1Ref.value) {
-        audio1Ref.value.volume = 0.3
+        audio1Ref.value.volume = 0.05
         audio1Ref.value.loop = true;
         audio1Ref.value.play()
     }
@@ -140,7 +159,6 @@ async function startReadMessageProcess(ms: number) {
         processRef.value = setInterval(async () => {
             updateAccessTokenState();
             await updateAccessToken();
-            console.log(tokenRef.value)
             responseMessage();
         }, ms);
     } catch (error) {
@@ -173,7 +191,7 @@ async function updateAccessToken() {
             const accessToken = localStorage.getItem('access_token');
             const expiresIn = Number(localStorage.getItem('expires_in'));
             if (accessToken && expiresIn !== 0) {
-                const expiredTime = new Date(new Date().getTime() + (expiresIn-10) * 1000);
+                const expiredTime = new Date(new Date().getTime() + (expiresIn - 10) * 1000);
                 // const expiredTime = new Date(new Date().getTime() + 60 * 1000);
                 const token = {
                     access_token: accessToken,
@@ -210,10 +228,10 @@ const responseMessage = async () => {
                         let response = await chatCompletions(message, authorId)
                         const language = await detectLanguage(response)
                         response = language === "en" || language === "ja" ? response : "Sorry, we only support Japanese or English."
-                        replyMessageRef.value = authorId !== null ? addMessageToChat(response, "assistant", "ひより", authorId) : addMessageToChat(response, "assistant", "ひより")
+                        replyMessageRef.value = authorId !== null ? addMessageToChat(response, "assistant", roleDisplayName, authorId) : addMessageToChat(response, "assistant", roleDisplayName)
                         const speechSynthesizer = language === "en" || language === "ja" ? initSpeechSynthesizer(language) : initSpeechSynthesizer("en")
                         isSpeakingRef.value = true
-                        speechServices.textToSpeech(speechSynthesizer, response)
+                        language === "en"?speechServices.textToSpeech(speechSynthesizer, response):handleVoicevoxAudioPlay(response)
                         processedMessageIdsRef.value.add(LiveChatMessage.id);
                         await waitForSpeechSynthesizerToClose()
                     }
@@ -438,8 +456,9 @@ async function chatCompletions(text: string, authorId: chatModel.Message["author
     height: 100%;
 }
 
-.div-13{
+.div-13 {
     height: 100%;
-  background-color: grey; /* 線の色、ここを変更する */
+    background-color: grey;
+    /* 線の色、ここを変更する */
 }
 </style>
